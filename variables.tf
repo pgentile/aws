@@ -5,7 +5,12 @@ variable "aws_region" {
   default = "eu-west-3"
 }
 
-variable "default_aws_availability_zone" {
+variable "aws_default_availability_zone" {
   description = "Default Availability Zone"
   default     = "eu-west-3a"
+}
+
+variable "my_ip" {
+  description = "My IP"
+  default     = "91.161.102.122"
 }
