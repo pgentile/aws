@@ -3,7 +3,7 @@ resource "aws_instance" "example" {
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
 
-  availability_zone           = "${var.aws_default_availability_zone}"
+  availability_zone           = "${element(local.availability_zones, count.index % length(local.availability_zones))}"
   key_name                    = "${aws_key_pair.ssh_key.key_name}"
   associate_public_ip_address = true
 

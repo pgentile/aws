@@ -55,12 +55,6 @@ resource "aws_default_route_table" "route_table" {
   }
 }
 
-data "aws_availability_zones" "availability_zones" {}
-
-locals {
-  availability_zones = "${sort(data.aws_availability_zones.availability_zones.names)}"
-}
-
 resource "aws_default_subnet" "default" {
   count             = "${length(local.availability_zones)}"
   availability_zone = "${element(local.availability_zones, count.index)}"
