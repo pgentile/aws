@@ -1,5 +1,5 @@
 resource "aws_instance" "example" {
-  count         = 2
+  count         = 1
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
 
@@ -8,7 +8,7 @@ resource "aws_instance" "example" {
   associate_public_ip_address = true
 
   tags {
-    Name        = "Terraform"
+    Name        = "${format("example-%03d", count.index + 1)}"
     Provisioner = "terraform"
   }
 
@@ -19,6 +19,20 @@ resource "aws_instance" "example" {
 
   root_block_device {
     volume_size = 8
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo yum -y update",
+      "sudo yum -y install nginx",
+      "sudo service nginx start",
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = "${file("~/.ssh/id_rsa")}"
+    }
   }
 }
 
@@ -87,4 +101,14 @@ resource "aws_lb_target_group_attachment" "example" {
   target_group_arn = "${aws_lb_target_group.backend.arn}"
   target_id        = "${element(aws_instance.example.*.id, count.index)}"
   port             = 80
+}
+
+output "example_lb_url" {
+  description = "Example load balancer URL"
+  value       = "http://${aws_lb.example.dns_name}"
+}
+
+output "example_ssh_connection_string" {
+  description = "SSH connection string"
+  value       = "${formatlist("ssh -o StrictHostKeyChecking=no ec2-user@%s", aws_instance.example.*.public_dns)}"
 }
