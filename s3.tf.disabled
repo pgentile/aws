@@ -1,0 +1,26 @@
+resource "aws_s3_bucket" "example" {
+  bucket_prefix = "pgentile-"
+  acl           = "private"
+  force_destroy = true
+
+  tags {
+    Name        = "example-bucket"
+    Provisioner = "terraform"
+  }
+}
+
+resource "aws_s3_bucket_object" "example" {
+  bucket       = "${aws_s3_bucket.example.id}"
+  key          = "readme"
+  content      = "README"
+  content_type = "text/plain"
+
+  tags {
+    Name        = "example-readme"
+    Provisioner = "terraform"
+  }
+}
+
+output "example_s3_bucket_url" {
+  value = "https://${aws_s3_bucket.example.bucket_domain_name}"
+}

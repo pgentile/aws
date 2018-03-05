@@ -3,7 +3,7 @@ resource "aws_default_vpc" "default" {
   enable_dns_hostnames = true
 
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
@@ -36,7 +36,7 @@ resource "aws_default_security_group" "default" {
   }
 
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
@@ -50,7 +50,7 @@ resource "aws_default_route_table" "route_table" {
   }
 
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
@@ -60,7 +60,7 @@ resource "aws_default_subnet" "default" {
   availability_zone = "${element(local.availability_zones, count.index)}"
 
   tags {
-    Name        = "DEFAULT / ${element(local.availability_zones, count.index)}"
+    Name        = "default-${element(local.availability_zones, count.index)}"
     Provisioner = "terraform"
   }
 }
@@ -132,7 +132,7 @@ resource "aws_default_network_acl" "default" {
   }
 
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
@@ -141,18 +141,19 @@ resource "aws_internet_gateway" "default" {
   vpc_id = "${aws_default_vpc.default.id}"
 
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
 
 resource "aws_default_vpc_dhcp_options" "default" {
   tags {
-    Name        = "DEFAULT"
+    Name        = "default"
     Provisioner = "terraform"
   }
 }
 
+/*
 resource "aws_flow_log" "default_vpc" {
   log_group_name = "${aws_cloudwatch_log_group.default_vpc.name}"
   iam_role_arn   = "${aws_iam_role.default_vpc_flow_log.arn}"
@@ -211,3 +212,5 @@ resource "aws_iam_role_policy" "default_vpc_flow_log" {
 }
 EOF
 }
+*/
+
