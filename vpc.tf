@@ -46,8 +46,16 @@ resource "aws_default_network_acl" "example" {
   tags = "${merge(local.default_tags, map("Name", "private"))}"
 }
 
-resource "aws_default_security_group" "private" {
+resource "aws_default_security_group" "default" {
   vpc_id = "${aws_vpc.example.id}"
+
+  ingress {
+    description = "ssh"
+    protocol   = "tcp"
+    cidr_blocks = ["${aws_vpc.example.cidr_block}"]
+    from_port  = 22
+    to_port    = 22
+  }
 
   egress {
     description = "http"
@@ -65,7 +73,7 @@ resource "aws_default_security_group" "private" {
     to_port     = 443
   }
 
-  tags = "${merge(local.default_tags, map("Name", "private"))}"
+  tags = "${merge(local.default_tags, map("Name", "default"))}"
 }
 
 resource "aws_default_route_table" "example" {
@@ -131,7 +139,7 @@ resource "aws_network_acl" "public" {
   subnet_ids = ["${aws_subnet.public.*.id}"]
 
   ingress {
-    rule_no    = 1
+    rule_no    = 100
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "${var.my_ip}/32"
@@ -140,7 +148,16 @@ resource "aws_network_acl" "public" {
   }
 
   ingress {
-    rule_no    = 2
+    rule_no    = 101
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "${aws_vpc.example.cidr_block}"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  ingress {
+    rule_no    = 200
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "0.0.0.0/0"
@@ -149,7 +166,7 @@ resource "aws_network_acl" "public" {
   }
 
   ingress {
-    rule_no    = 3
+    rule_no    = 300
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "0.0.0.0/0"
@@ -158,7 +175,16 @@ resource "aws_network_acl" "public" {
   }
 
   egress {
-    rule_no    = 1
+    rule_no    = 100
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "${aws_vpc.example.cidr_block}"
+    from_port  = 22
+    to_port    = 22
+  }
+
+  egress {
+    rule_no    = 200
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "0.0.0.0/0"
@@ -167,7 +193,7 @@ resource "aws_network_acl" "public" {
   }
 
   egress {
-    rule_no    = 2
+    rule_no    = 201
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "0.0.0.0/0"
@@ -176,7 +202,7 @@ resource "aws_network_acl" "public" {
   }
 
   egress {
-    rule_no    = 3
+    rule_no    = 300
     protocol   = "tcp"
     action     = "allow"
     cidr_block = "0.0.0.0/0"
@@ -187,8 +213,8 @@ resource "aws_network_acl" "public" {
   tags = "${merge(local.default_tags, map("Name", "public"))}"
 }
 
-resource "aws_security_group" "ssh" {
-  name   = "ssh"
+resource "aws_security_group" "ssh_external" {
+  name   = "ssh-external"
   vpc_id = "${aws_vpc.example.id}"
 
   ingress {
@@ -196,7 +222,19 @@ resource "aws_security_group" "ssh" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = ["${var.my_ip}/32"]
+    cidr_blocks = [
+      "${var.my_ip}/32",
+    ]
+  }
+
+  egress {
+    description = "ssh"
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = [
+      "${aws_vpc.example.cidr_block}",
+    ]
   }
 
   tags = "${merge(local.default_tags, map("Name", "ssh"))}"
