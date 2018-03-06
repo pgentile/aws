@@ -6,7 +6,7 @@ resource "aws_instance" "example" {
   vpc_security_group_ids = [
     "${aws_vpc.example.default_security_group_id}",
     "${aws_security_group.ssh_external.id}",
-    "${aws_security_group.http.id}",
+    "${aws_security_group.http_server.id}",
   ]
 
   subnet_id                   = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"

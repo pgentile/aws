@@ -237,11 +237,11 @@ resource "aws_security_group" "ssh_external" {
     ]
   }
 
-  tags = "${merge(local.default_tags, map("Name", "ssh"))}"
+  tags = "${merge(local.default_tags, map("Name", "ssh-external"))}"
 }
 
-resource "aws_security_group" "http" {
-  name   = "http"
+resource "aws_security_group" "http_server" {
+  name   = "http-server"
   vpc_id = "${aws_vpc.example.id}"
 
   ingress {
@@ -252,5 +252,5 @@ resource "aws_security_group" "http" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${merge(local.default_tags, map("Name", "http"))}"
+  tags = "${merge(local.default_tags, map("Name", "http-server"))}"
 }
