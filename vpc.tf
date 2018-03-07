@@ -227,35 +227,6 @@ resource "aws_network_acl" "public" {
   tags = "${merge(local.default_tags, map("Name", "public"))}"
 }
 
-resource "aws_security_group" "ssh_bastion" {
-  name   = "ssh-bastion"
-  vpc_id = "${aws_vpc.example.id}"
-
-  // SSH server from my IP
-  ingress {
-    description = "ssh"
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
-    cidr_blocks = [
-      "${var.my_ip}/32",
-    ]
-  }
-
-  // SSH client in the VPC
-  egress {
-    description = "ssh"
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
-    cidr_blocks = [
-      "${aws_vpc.example.cidr_block}",
-    ]
-  }
-
-  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
-}
-
 resource "aws_security_group" "http_server" {
   name   = "http-server"
   vpc_id = "${aws_vpc.example.id}"
@@ -270,4 +241,29 @@ resource "aws_security_group" "http_server" {
   }
 
   tags = "${merge(local.default_tags, map("Name", "http-server"))}"
+}
+
+resource "aws_security_group" "ssh_bastion" {
+  name   = "ssh-bastion"
+  vpc_id = "${aws_vpc.example.id}"
+
+  // SSH server from my IP
+  ingress {
+    description = "ssh"
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = ["${var.my_ip}/32"]
+  }
+
+  // SSH client in the VPC
+  egress {
+    description = "ssh"
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = ["${aws_vpc.example.cidr_block}"]
+  }
+
+  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
 }

@@ -1,11 +1,13 @@
 resource "aws_instance" "example" {
-  count         = 1
+  depends_on = ["aws_internet_gateway.example"]
+
+  count         = 0
+
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
 
   vpc_security_group_ids = [
     "${aws_vpc.example.default_security_group_id}",
-    "${aws_security_group.ssh_bastion.id}",
     "${aws_security_group.http_server.id}",
   ]
 
@@ -34,45 +36,7 @@ resource "aws_instance" "example" {
   volume_tags = "${local.default_tags}"
 }
 
-resource "aws_instance" "private" {
-  count         = 0
-  ami           = "${data.aws_ami.amazon_linux.id}"
-  instance_type = "t2.micro"
-
-  vpc_security_group_ids = [
-    "${aws_vpc.example.default_security_group_id}",
-  ]
-
-  subnet_id = "${element(aws_subnet.private.*.id, count.index % aws_subnet.private.count)}"
-  key_name  = "${aws_key_pair.ssh_key.key_name}"
-
-  root_block_device {
-    volume_size = 8
-  }
-
-  tags        = "${merge(local.default_tags, map("Name", format("private-%03d", count.index + 1)))}"
-  volume_tags = "${local.default_tags}"
-}
-
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["amzn-ami-*-x86_64-gp2"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
-}
-
+/*
 output "example_ssh_connection_string" {
   description = "SSH connection string"
   value       = "${formatlist("ssh -o StrictHostKeyChecking=no ec2-user@%s", aws_instance.example.*.public_dns)}"
@@ -82,3 +46,4 @@ output "example_http_connection_string" {
   description = "HTTP connection string"
   value       = "${formatlist("http://%s", aws_instance.example.*.public_dns)}"
 }
+*/
