@@ -4,4 +4,4 @@
 *.tfstate*
 .terraform/
 
-my_ip.tfvars
+my-ip.tfvars

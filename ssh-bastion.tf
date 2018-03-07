@@ -4,17 +4,6 @@ resource "aws_instance" "ssh_bastion" {
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
 
-  /*
-  vpc_security_group_ids = [
-    "${aws_vpc.example.default_security_group_id}",
-    "${aws_security_group.ssh_bastion.id}",
-  ]
-  */
-
-  /*
-  subnet_id                   = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
-  */
-
   key_name                    = "${aws_key_pair.ssh_key.key_name}"
   root_block_device {
     volume_size = 8
