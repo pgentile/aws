@@ -16,6 +16,7 @@ resource "aws_vpc" "example" {
 resource "aws_default_network_acl" "example" {
   default_network_acl_id = "${aws_vpc.example.default_network_acl_id}"
 
+  // Returning TCP traffic
   ingress {
     rule_no    = 1
     protocol   = "tcp"
@@ -25,6 +26,7 @@ resource "aws_default_network_acl" "example" {
     to_port    = "${local.ephemeral_ports_end}"
   }
 
+  // HTTP clients
   egress {
     rule_no    = 1
     protocol   = "tcp"
@@ -34,6 +36,7 @@ resource "aws_default_network_acl" "example" {
     to_port    = 80
   }
 
+  // HTTPS clients
   egress {
     rule_no    = 2
     protocol   = "tcp"
@@ -43,12 +46,13 @@ resource "aws_default_network_acl" "example" {
     to_port    = 443
   }
 
-  tags = "${merge(local.default_tags, map("Name", "private"))}"
+  tags = "${local.default_tags}"
 }
 
-resource "aws_default_security_group" "default" {
+resource "aws_default_security_group" "example" {
   vpc_id = "${aws_vpc.example.id}"
 
+  // SSH server in the VPC
   ingress {
     description = "ssh"
     protocol   = "tcp"
@@ -57,6 +61,7 @@ resource "aws_default_security_group" "default" {
     to_port    = 22
   }
 
+  // HTTP clients
   egress {
     description = "http"
     protocol    = "tcp"
@@ -65,6 +70,7 @@ resource "aws_default_security_group" "default" {
     to_port     = 80
   }
 
+  // HTTPS clients
   egress {
     description = "https"
     protocol    = "tcp"
@@ -73,13 +79,13 @@ resource "aws_default_security_group" "default" {
     to_port     = 443
   }
 
-  tags = "${merge(local.default_tags, map("Name", "default"))}"
+  tags = "${local.default_tags}"
 }
 
 resource "aws_default_route_table" "example" {
   default_route_table_id = "${aws_vpc.example.default_route_table_id}"
 
-  tags = "${merge(local.default_tags, map("Name", "private"))}"
+  tags = "${local.default_tags}"
 }
 
 resource "aws_vpc_dhcp_options" "example" {
@@ -138,6 +144,7 @@ resource "aws_network_acl" "public" {
   vpc_id     = "${aws_vpc.example.id}"
   subnet_ids = ["${aws_subnet.public.*.id}"]
 
+  // SSH server from my IP
   ingress {
     rule_no    = 100
     protocol   = "tcp"
@@ -147,6 +154,7 @@ resource "aws_network_acl" "public" {
     to_port    = 22
   }
 
+  // SSH client in the VPC
   ingress {
     rule_no    = 101
     protocol   = "tcp"
@@ -156,6 +164,7 @@ resource "aws_network_acl" "public" {
     to_port    = 22
   }
 
+  // HTTP server
   ingress {
     rule_no    = 200
     protocol   = "tcp"
@@ -165,6 +174,7 @@ resource "aws_network_acl" "public" {
     to_port    = 80
   }
 
+  // Returning TCP traffic
   ingress {
     rule_no    = 300
     protocol   = "tcp"
@@ -174,6 +184,7 @@ resource "aws_network_acl" "public" {
     to_port    = "${local.ephemeral_ports_end}"
   }
 
+  // SSH clients in the VPC
   egress {
     rule_no    = 100
     protocol   = "tcp"
@@ -183,6 +194,7 @@ resource "aws_network_acl" "public" {
     to_port    = 22
   }
 
+  // HTTP clients
   egress {
     rule_no    = 200
     protocol   = "tcp"
@@ -192,6 +204,7 @@ resource "aws_network_acl" "public" {
     to_port    = 80
   }
 
+  // HTTPS clients
   egress {
     rule_no    = 201
     protocol   = "tcp"
@@ -201,6 +214,7 @@ resource "aws_network_acl" "public" {
     to_port    = 443
   }
 
+  // Outgoing traffic to all (useful for the HTTP server)
   egress {
     rule_no    = 300
     protocol   = "tcp"
@@ -213,10 +227,11 @@ resource "aws_network_acl" "public" {
   tags = "${merge(local.default_tags, map("Name", "public"))}"
 }
 
-resource "aws_security_group" "ssh_external" {
-  name   = "ssh-external"
+resource "aws_security_group" "ssh_bastion" {
+  name   = "ssh-bastion"
   vpc_id = "${aws_vpc.example.id}"
 
+  // SSH server from my IP
   ingress {
     description = "ssh"
     protocol    = "tcp"
@@ -227,6 +242,7 @@ resource "aws_security_group" "ssh_external" {
     ]
   }
 
+  // SSH client in the VPC
   egress {
     description = "ssh"
     protocol    = "tcp"
@@ -237,13 +253,14 @@ resource "aws_security_group" "ssh_external" {
     ]
   }
 
-  tags = "${merge(local.default_tags, map("Name", "ssh-external"))}"
+  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
 }
 
 resource "aws_security_group" "http_server" {
   name   = "http-server"
   vpc_id = "${aws_vpc.example.id}"
 
+  // HTTP server
   ingress {
     description = "http"
     protocol    = "tcp"

@@ -14,6 +14,12 @@ Create infrastructure:
 terraform apply -auto-approve -var-file=my_ip.tfvars 
 ```
 
+Destroy infrastructure:
+
+```
+terraform destroy -force -var-file=my_ip.tfvars 
+```
+
 Connections SSH
 ===============
 
