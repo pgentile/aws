@@ -6,7 +6,7 @@ locals {
 }
 
 resource "aws_vpc" "example" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = "${var.cidr_block}"
   enable_dns_support   = true
   enable_dns_hostnames = true
 
@@ -100,19 +100,19 @@ resource "aws_vpc_dhcp_options_association" "example" {
 }
 
 resource "aws_subnet" "private" {
-  count             = "${length(local.availability_zones)}"
-  availability_zone = "${element(local.availability_zones, count.index)}"
+  count             = "${length(var.availability_zones)}"
+  availability_zone = "${element(var.availability_zones, count.index)}"
   vpc_id            = "${aws_vpc.example.id}"
-  cidr_block        = "${cidrsubnet(local.vpc_private_cidr_block, 4, count.index + 1)}"
+  cidr_block        = "${cidrsubnet(local.vpc_private_cidr_block, 3, count.index)}"
 
   tags = "${merge(local.default_tags, map("Name", "private"))}"
 }
 
 resource "aws_subnet" "public" {
-  count             = "${length(local.availability_zones)}"
-  availability_zone = "${element(local.availability_zones, count.index)}"
+  count             = "${length(var.availability_zones)}"
+  availability_zone = "${element(var.availability_zones, count.index)}"
   vpc_id            = "${aws_vpc.example.id}"
-  cidr_block        = "${cidrsubnet(local.vpc_public_cidr_block, 4, count.index + 1)}"
+  cidr_block        = "${cidrsubnet(local.vpc_public_cidr_block, 3, aws_subnet.private.count + count.index)}"
 
   tags = "${merge(local.default_tags, map("Name", "public"))}"
 }

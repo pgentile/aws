@@ -1,5 +1,5 @@
 resource "aws_instance" "example" {
-  depends_on = ["aws_internet_gateway.example"]
+  depends_on = ["aws_internet_gateway.example", "aws_instance.ssh_bastion"]
 
   count         = 1
 
@@ -31,7 +31,7 @@ resource "aws_instance" "example" {
 
     connection {
       type        = "ssh"
-      
+
       host        = "${self.private_ip}"
       user        = "ec2-user"
       private_key = "${file("~/.ssh/id_rsa")}"
