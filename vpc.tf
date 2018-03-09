@@ -171,13 +171,13 @@ resource "aws_network_acl_rule" "public_ingress_ssh_bastion" {
   to_port        = 22
 }
 
-resource "aws_network_acl_rule" "public_ingress_ssh_vpc" {
+resource "aws_network_acl_rule" "public_ingress_ssh_from_bastion" {
   network_acl_id = "${aws_network_acl.public.id}"
   egress         = false
   rule_number    = 3
   protocol       = "tcp"
   rule_action    = "allow"
-  cidr_block     = "${aws_vpc.example.cidr_block}"
+  cidr_block     = "${aws_eip.ssh_bastion.private_ip}/32"
   from_port      = 22
   to_port        = 22
 }
