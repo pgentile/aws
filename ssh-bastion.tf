@@ -1,15 +1,16 @@
 resource "aws_eip" "ssh_bastion" {
   depends_on = ["aws_internet_gateway.example"]
 
-  vpc       = true
+  vpc = true
 
   tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
 }
 
 resource "aws_network_interface" "ssh_bastion" {
-  description       = "Network interface for SSH bastion"
-  subnet_id         = "${aws_subnet.public.0.id}"
-  security_groups   = [
+  description = "Network interface for SSH bastion"
+  subnet_id   = "${aws_subnet.public.0.id}"
+
+  security_groups = [
     "${aws_vpc.example.default_security_group_id}",
     "${aws_security_group.ssh_bastion.id}",
   ]
@@ -19,7 +20,7 @@ resource "aws_network_interface" "ssh_bastion" {
 
 resource "aws_eip_association" "eip_assoc" {
   network_interface_id = "${aws_network_interface.ssh_bastion.id}"
-  allocation_id = "${aws_eip.ssh_bastion.id}"
+  allocation_id        = "${aws_eip.ssh_bastion.id}"
 }
 
 resource "aws_instance" "ssh_bastion" {
@@ -33,10 +34,10 @@ resource "aws_instance" "ssh_bastion" {
   root_block_device {
     volume_size = 8
   }
-  
+
   network_interface {
-     network_interface_id = "${aws_network_interface.ssh_bastion.id}"
-     device_index = 0
+    network_interface_id = "${aws_network_interface.ssh_bastion.id}"
+    device_index         = 0
   }
 
   provisioner "remote-exec" {
@@ -48,11 +49,11 @@ resource "aws_instance" "ssh_bastion" {
       type        = "ssh"
       host        = "${aws_eip.ssh_bastion.public_ip}"
       user        = "ec2-user"
-      private_key = "${file("~/.ssh/id_rsa")}"
+      private_key = "${file("${var.ssh_private_key_file}")}"
     }
   }
 
-  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
+  tags        = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
   volume_tags = "${local.default_tags}"
 }
 

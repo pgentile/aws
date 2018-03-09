@@ -55,10 +55,10 @@ resource "aws_default_security_group" "example" {
   // SSH server in the VPC
   ingress {
     description = "ssh"
-    protocol   = "tcp"
+    protocol    = "tcp"
     cidr_blocks = ["${aws_vpc.example.cidr_block}"]
-    from_port  = 22
-    to_port    = 22
+    from_port   = 22
+    to_port     = 22
   }
 
   // HTTP clients

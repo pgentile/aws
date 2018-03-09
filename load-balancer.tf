@@ -1,6 +1,7 @@
 resource "aws_lb" "example" {
-  name            = "example"
-  subnets         = ["${aws_subnet.public.*.id}"]
+  name    = "example"
+  subnets = ["${aws_subnet.public.*.id}"]
+
   security_groups = [
     "${aws_vpc.example.default_security_group_id}",
     "${aws_security_group.http_server.id}",

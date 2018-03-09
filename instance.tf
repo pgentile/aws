@@ -1,7 +1,7 @@
 resource "aws_instance" "example" {
   depends_on = ["aws_internet_gateway.example", "aws_instance.ssh_bastion"]
 
-  count         = 1
+  count = 1
 
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
@@ -16,8 +16,9 @@ resource "aws_instance" "example" {
   // Ou alors, il nous faudrait une NAT instance
   associate_public_ip_address = true
 
-  subnet_id                   = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
-  key_name                    = "${aws_key_pair.ssh_key.key_name}"
+  subnet_id = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
+  key_name  = "${aws_key_pair.ssh_key.key_name}"
+
   root_block_device {
     volume_size = 8
   }
@@ -31,10 +32,9 @@ resource "aws_instance" "example" {
 
     connection {
       type        = "ssh"
-
       host        = "${self.private_ip}"
       user        = "ec2-user"
-      private_key = "${file("~/.ssh/id_rsa")}"
+      private_key = "${file("${var.ssh_private_key_file}")}"
 
       bastion_host = "${aws_eip.ssh_bastion.public_ip}"
     }
@@ -44,9 +44,9 @@ resource "aws_instance" "example" {
   volume_tags = "${local.default_tags}"
 }
 
-output "example_ssh_connection_string" {
-  description = "SSH connection string"
-  value       = "${formatlist("ssh -o StrictHostKeyChecking=no ec2-user@%s", aws_instance.example.*.public_dns)}"
+output "example_private_ip" {
+  description = "Example private IP"
+  value       = "${aws_instance.example.*.private_ip}"
 }
 
 output "example_http_connection_string" {
