@@ -177,7 +177,7 @@ resource "aws_network_acl_rule" "public_ingress_ssh_from_bastion" {
   rule_number    = 3
   protocol       = "tcp"
   rule_action    = "allow"
-  cidr_block     = "${aws_eip.ssh_bastion.private_ip}/32"
+  cidr_block     = "${aws_network_interface.ssh_bastion.private_ips[0]}/32"
   from_port      = 22
   to_port        = 22
 }
