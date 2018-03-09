@@ -49,6 +49,11 @@ output "example_private_ip" {
   value       = "${aws_instance.example.*.private_ip}"
 }
 
+output "example_ssh_connection_string" {
+  description = "Bastion SSH connection string"
+  value       = "${formatlist("ssh -t -A -o StrictHostKeyChecking=no ec2-user@%s ssh %s", aws_eip.ssh_bastion.public_ip, aws_instance.example.*.private_ip)}"
+}
+
 output "example_http_connection_string" {
   description = "HTTP connection string"
   value       = "${formatlist("http://%s", aws_instance.example.*.public_dns)}"
