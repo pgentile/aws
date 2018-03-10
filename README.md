@@ -16,20 +16,20 @@ Create infrastructure
 My IP address file:
 
 ```
-# my_ip.tfvars
+# my_ip.auto.tfvars
 my_ip = "MY_IP_ADDRESS"
 ```
 
 Create infrastructure:
 
 ```
-terraform apply -auto-approve -var-file=my_ip.tfvars 
+terraform apply -auto-approve
 ```
 
 Destroy infrastructure:
 
 ```
-terraform destroy -force -var-file=my_ip.tfvars 
+terraform destroy -force
 ```
 
 
