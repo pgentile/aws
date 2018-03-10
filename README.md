@@ -1,3 +1,15 @@
+Init AWS
+========
+
+Init config with the AWS cli :
+
+```
+aws configure
+```
+
+This config wil be used by Terraform.
+
+
 Create infrastructure
 =====================
 
@@ -20,6 +32,7 @@ Destroy infrastructure:
 terraform destroy -force -var-file=my_ip.tfvars 
 ```
 
+
 Connections SSH
 ===============
 
@@ -33,6 +46,7 @@ ssh -A -o StrictHostKeyChecking=no ec2-user@NAME.eu-west-3.compute.amazonaws.com
 
 # Then, ssh PRIVATE_IP
 ```
+
 
 Check my system
 ===============
