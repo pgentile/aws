@@ -1,5 +1,5 @@
 resource "aws_instance" "example" {
-  depends_on = ["aws_internet_gateway.example", "aws_instance.ssh_bastion"]
+  depends_on = ["aws_instance.ssh_bastion"]
 
   count = 1
 
@@ -7,8 +7,7 @@ resource "aws_instance" "example" {
   instance_type = "t2.micro"
 
   vpc_security_group_ids = [
-    "${aws_vpc.example.default_security_group_id}",
-    "${aws_security_group.http_server.id}",
+    "${module.vpc.default_security_group_id}",
   ]
 
   // Normalement, on ne devrait pas faire ça, mais bon...
@@ -16,7 +15,7 @@ resource "aws_instance" "example" {
   // Ou alors, il nous faudrait une NAT instance
   associate_public_ip_address = true
 
-  subnet_id = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
+  subnet_id = "${element(module.vpc.public_subnets, count.index % length(module.vpc.public_subnets))}"
   key_name  = "${aws_key_pair.ssh_key.key_name}"
 
   root_block_device {
@@ -38,7 +37,7 @@ resource "aws_instance" "example" {
       user        = "ec2-user"
       private_key = "${file("${var.ssh_private_key_file}")}"
 
-      bastion_host = "${aws_eip.ssh_bastion.public_ip}"
+      bastion_host = "${aws_eip.ssh_bastion.0.public_ip}"
     }
   }
 
@@ -53,7 +52,7 @@ output "example_private_ip" {
 
 output "example_ssh_connection_string" {
   description = "Bastion SSH connection string"
-  value       = "${formatlist("ssh -t -A -o StrictHostKeyChecking=no ec2-user@%s ssh %s", aws_eip.ssh_bastion.public_ip, aws_instance.example.*.private_ip)}"
+  value       = "${formatlist("ssh -t -A -o StrictHostKeyChecking=no ec2-user@%s ssh %s", aws_eip.ssh_bastion.0.public_ip, aws_instance.example.*.private_ip)}"
 }
 
 output "example_http_connection_string" {
