@@ -37,6 +37,7 @@ variable "ssh_public_key_file" {
 locals {
   default_tags = {
     Name        = "example"
+    Env         = "test"
     Provisioner = "terraform"
   }
 }
