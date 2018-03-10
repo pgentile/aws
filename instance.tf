@@ -26,6 +26,8 @@ resource "aws_instance" "example" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum -y update",
+      "sudo yum-config-manager --enable epel",
+      "sudo yum -y install ansible",
       "sudo yum -y install nginx",
       "sudo service nginx start",
     ]

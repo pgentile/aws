@@ -7,7 +7,7 @@ shift
 
 extras=
 case "$command" in
-    apply | destroy | taint)
+    plan | apply | destroy | taint)
         extras="-var-file=my-ip.tfvars"
         ;;
 esac

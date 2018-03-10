@@ -1,9 +1,13 @@
+locals {
+  ssh_bastion_tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
+}
+
 resource "aws_eip" "ssh_bastion" {
   depends_on = ["aws_internet_gateway.example"]
 
   vpc = true
 
-  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
+  tags = "${local.ssh_bastion_tags}"
 }
 
 resource "aws_network_interface" "ssh_bastion" {
@@ -15,7 +19,7 @@ resource "aws_network_interface" "ssh_bastion" {
     "${aws_security_group.ssh_bastion.id}",
   ]
 
-  tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
+  tags = "${local.ssh_bastion_tags}"
 }
 
 resource "aws_eip_association" "eip_assoc" {
@@ -43,6 +47,8 @@ resource "aws_instance" "ssh_bastion" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum -y update",
+      "sudo yum-config-manager --enable epel",
+      "sudo yum -y install ansible",
     ]
 
     connection {
@@ -53,8 +59,8 @@ resource "aws_instance" "ssh_bastion" {
     }
   }
 
-  tags        = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
-  volume_tags = "${local.default_tags}"
+  tags        = "${local.ssh_bastion_tags}"
+  volume_tags = "${local.ssh_bastion_tags}"
 }
 
 output "bastion_ssh_connection_string" {

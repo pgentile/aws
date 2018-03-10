@@ -33,3 +33,21 @@ ssh -A -o StrictHostKeyChecking=no ec2-user@NAME.eu-west-3.compute.amazonaws.com
 
 # Then, ssh PRIVATE_IP
 ```
+
+Check my system
+===============
+
+SSH config:
+
+```
+sudo sshd -T
+```
+
+Check the system with Lynis:
+
+```
+sudo yum install lynis 
+lynis show profiles
+lynis show settings
+sudo lynis audit system
+```
