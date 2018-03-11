@@ -24,10 +24,10 @@ variable "availability_zones" {
   type        = "list"
 }
 
-variable "internet_gateway_id" {
-  description = "Internet gateway ID"
+variable "public" {
+  description = "It is a public network ?"
   type        = "string"
-  default     = ""
+  default     = false
 }
 
 locals {

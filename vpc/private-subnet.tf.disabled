@@ -10,10 +10,9 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_route_table" "private" {
-  count = "${length(var.private_cidr_blocks) > 0 ? 1 : 0}"
-
   vpc_id = "${aws_vpc.this.id}"
-  tags   = "${merge(local.default_tags, map("Name", "private"))}"
+
+  tags = "${merge(local.default_tags, map("Name", "private"))}"
 }
 
 resource "aws_route_table_association" "private" {
@@ -22,16 +21,9 @@ resource "aws_route_table_association" "private" {
   route_table_id = "${aws_route_table.private.id}"
 }
 
-resource "aws_route" "gateway" {
-  // count = "${var.private_gateway_network_interface_id != "" ? 1 : 0}"
+resource "aws_network_acl" "this" {
+  vpc_id     = "${aws_vpc.this.id}"
+  subnet_ids = "${aws_subnet.private.*.id}"
 
-  route_table_id         = "${aws_route_table.private.id}"
-  destination_cidr_block = "0.0.0.0/0"
-
-  network_interface_id = "${aws_network_interface.test.id}"
-}
-
-resource "aws_network_interface" "test" {
-  subnet_id       = "${aws_subnet.private.0.id}"
-  security_groups = ["${aws_vpc.this.default_security_group_id}"]
+  tags = "${merge(local.default_tags, map("Name", "private"))}"
 }
