@@ -6,11 +6,6 @@ resource "aws_vpc" "this" {
   tags = "${local.default_tags}"
 }
 
-resource "aws_default_network_acl" "this" {
-  default_network_acl_id = "${aws_vpc.this.default_network_acl_id}"
-  tags                   = "${local.default_tags}"
-}
-
 resource "aws_default_security_group" "this" {
   vpc_id = "${aws_vpc.this.id}"
   tags   = "${local.default_tags}"
@@ -40,10 +35,9 @@ module "public_network" {
   availability_zones = "${var.public_availability_zones}"
   cidr_blocks        = "${var.public_cidr_blocks}"
 
-  tags = "${merge(local.default_tags)}"
+  tags = "${local.default_tags}"
 }
 
-/*
 module "private_network" {
   source = "./subnet"
 
@@ -52,7 +46,5 @@ module "private_network" {
   availability_zones = "${var.private_availability_zones}"
   cidr_blocks        = "${var.private_cidr_blocks}"
 
-  tags = "${merge(local.default_tags)}"
+  tags = "${local.default_tags}"
 }
-*/
-

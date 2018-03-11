@@ -5,7 +5,7 @@ resource "aws_subnet" "this" {
   availability_zone = "${var.availability_zones[count.index]}"
   cidr_block        = "${var.cidr_blocks[count.index]}"
 
-  tags = "${merge(local.default_tags, map("Name", local.network_names[count.index]))}"
+  tags = "${merge(local.default_tags, map("Name", local.subnet_names[count.index]))}"
 }
 
 resource "aws_route_table" "this" {
@@ -33,29 +33,4 @@ resource "aws_internet_gateway" "this" {
   vpc_id = "${var.vpc_id}"
 
   tags = "${local.default_tags}"
-}
-
-// Can't use aws_subnet.this.*.id
-// This is a workaround to repeat the ACL and use the deprecated subnet_id field
-
-resource "aws_network_acl" "this" {
-  count = "${length(var.availability_zones)}"
-
-  vpc_id    = "${var.vpc_id}"
-  subnet_id = "${element(aws_subnet.this.*.id, count.index)}"
-
-  tags = "${merge(local.default_tags, map("Name", local.network_names[count.index]))}"
-}
-
-resource "aws_network_acl_rule" "ingress_tcp_all" {
-  count = "${length(var.availability_zones)}"
-
-  network_acl_id = "${element(aws_network_acl.this.*.id, count.index)}"
-  rule_number    = 9999
-  egress         = false
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 1024
-  to_port        = 65535
 }

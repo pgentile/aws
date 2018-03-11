@@ -38,12 +38,6 @@ variable "private_cidr_blocks" {
   default     = []
 }
 
-variable "private_gateway_network_interface_id" {
-  description = "Private network gateway interface ID"
-  type        = "string"
-  default     = ""
-}
-
 locals {
   default_tags = "${merge(var.tags, map("Name", var.name))}"
 }

@@ -32,5 +32,5 @@ variable "public" {
 
 locals {
   default_tags  = "${merge(var.tags, map("Name", var.name))}"
-  network_names = "${formatlist("%s-%s", var.name, var.availability_zones)}"
+  subnet_names = "${formatlist("%s-%s", var.name, var.availability_zones)}"
 }
