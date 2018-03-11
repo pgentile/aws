@@ -38,6 +38,18 @@ variable "private_cidr_blocks" {
   default     = []
 }
 
+variable "database_availability_zones" {
+  description = "Database availability zones"
+  type        = "list"
+  default     = []
+}
+
+variable "database_cidr_blocks" {
+  description = "Database CIDR blocks"
+  type        = "list"
+  default     = []
+}
+
 locals {
   default_tags = "${merge(var.tags, map("Name", var.name))}"
 }

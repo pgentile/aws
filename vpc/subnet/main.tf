@@ -9,18 +9,21 @@ resource "aws_subnet" "this" {
 }
 
 resource "aws_route_table" "this" {
+  count = "${aws_subnet.this.count > 0 ? 1 : 0}"
+
   vpc_id = "${var.vpc_id}"
   tags   = "${local.default_tags}"
 }
 
 resource "aws_route_table_association" "this" {
-  count          = "${length(var.availability_zones)}"
+  count = "${aws_subnet.this.count}"
+
   subnet_id      = "${element(aws_subnet.this.*.id, count.index)}"
   route_table_id = "${aws_route_table.this.id}"
 }
 
 resource "aws_route" "internet_gateway" {
-  count = "${var.public == 1 ? 1 : 0}"
+  count = "${aws_subnet.this.count > 0 && var.public == 1 ? 1 : 0}"
 
   route_table_id         = "${aws_route_table.this.id}"
   destination_cidr_block = "0.0.0.0/0"
@@ -28,9 +31,8 @@ resource "aws_route" "internet_gateway" {
 }
 
 resource "aws_internet_gateway" "this" {
-  count = "${var.public == 1 ? 1 : 0}"
+  count = "${aws_subnet.this.count > 0 && var.public == 1 ? 1 : 0}"
 
   vpc_id = "${var.vpc_id}"
-
-  tags = "${local.default_tags}"
+  tags   = "${local.default_tags}"
 }

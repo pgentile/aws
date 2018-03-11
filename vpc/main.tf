@@ -48,3 +48,14 @@ module "private_network" {
 
   tags = "${local.default_tags}"
 }
+
+module "database_network" {
+  source = "./subnet"
+
+  name               = "database"
+  vpc_id             = "${aws_vpc.this.id}"
+  availability_zones = "${var.database_availability_zones}"
+  cidr_blocks        = "${var.database_cidr_blocks}"
+
+  tags = "${local.default_tags}"
+}

@@ -14,6 +14,16 @@ variable "availability_zones" {
   ]
 }
 
+variable "database_availability_zones" {
+  description = "AWS database availability zones"
+
+  default = [
+    "eu-west-3a",
+    "eu-west-3b",
+    "eu-west-3c",
+  ]
+}
+
 variable "cidr_block" {
   description = "CIDR block of the VPC"
   default     = "10.0.0.0/16"
