@@ -6,11 +6,6 @@ resource "aws_vpc" "this" {
   tags = "${local.default_tags}"
 }
 
-resource "aws_default_security_group" "this" {
-  vpc_id = "${aws_vpc.this.id}"
-  tags   = "${local.default_tags}"
-}
-
 resource "aws_default_route_table" "this" {
   default_route_table_id = "${aws_vpc.this.default_route_table_id}"
   tags                   = "${local.default_tags}"
