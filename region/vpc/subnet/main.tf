@@ -1,5 +1,5 @@
 resource "aws_subnet" "this" {
-  count = "${length(var.availability_zones)}"
+  count = "${length(var.cidr_blocks)}"
 
   vpc_id            = "${var.vpc_id}"
   availability_zone = "${var.availability_zones[count.index]}"

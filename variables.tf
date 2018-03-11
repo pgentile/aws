@@ -1,34 +1,3 @@
-variable "region" {
-  description = "AWS region"
-
-  # Paris
-  default = "eu-west-3"
-}
-
-variable "availability_zones" {
-  description = "AWS availability zones"
-
-  default = [
-    "eu-west-3a",
-    "eu-west-3b",
-  ]
-}
-
-variable "database_availability_zones" {
-  description = "AWS database availability zones"
-
-  default = [
-    "eu-west-3a",
-    "eu-west-3b",
-    "eu-west-3c",
-  ]
-}
-
-variable "cidr_block" {
-  description = "CIDR block of the VPC"
-  default     = "10.0.0.0/16"
-}
-
 variable "my_ip" {
   description = "My IP"
   type        = "string"
@@ -45,9 +14,19 @@ variable "ssh_public_key_file" {
 }
 
 locals {
-  default_tags = {
+  tags = {
     Name        = "example"
     Env         = "EXAMPLE"
     Provisioner = "terraform"
   }
+
+  primary_region                      = "eu-west-3"
+  primary_cidr_block                  = "10.0.0.0/16"
+  primary_availability_zones          = ["eu-west-3a", "eu-west-3b"]
+  primary_database_availability_zones = ["eu-west-3a", "eu-west-3b", "eu-west-3c"]
+
+  secondary_region                      = "eu-west-1"
+  secondary_cidr_block                  = "10.1.0.0/16"
+  secondary_availability_zones          = ["eu-west-1a", "eu-west-1b"]
+  secondary_database_availability_zones = ["eu-west-1a", "eu-west-1b"]
 }
