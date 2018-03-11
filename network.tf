@@ -7,14 +7,10 @@ module "primary" {
   ssh_private_key_file = "${var.ssh_private_key_file}"
   ssh_public_key_file  = "${var.ssh_public_key_file}"
 
-  public_availability_zones = ["${local.primary_availability_zones}"]
-
   public_cidr_blocks = [
     "${cidrsubnet(local.primary_cidr_block, 3, 0)}",
     "${cidrsubnet(local.primary_cidr_block, 3, 1)}",
   ]
-
-  database_availability_zones = ["${local.primary_database_availability_zones}"]
 
   database_cidr_blocks = [
     "${cidrsubnet(local.primary_cidr_block, 3, 2)}",
@@ -38,14 +34,10 @@ module "secondary" {
   ssh_private_key_file = "${var.ssh_private_key_file}"
   ssh_public_key_file  = "${var.ssh_public_key_file}"
 
-  public_availability_zones = ["${local.secondary_availability_zones}"]
-
   public_cidr_blocks = [
     "${cidrsubnet(local.secondary_cidr_block, 3, 0)}",
     "${cidrsubnet(local.secondary_cidr_block, 3, 1)}",
   ]
-
-  database_availability_zones = ["${local.secondary_database_availability_zones}"]
 
   database_cidr_blocks = [
     "${cidrsubnet(local.secondary_cidr_block, 3, 2)}",

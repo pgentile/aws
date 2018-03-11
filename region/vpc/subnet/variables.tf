@@ -22,6 +22,7 @@ variable "cidr_blocks" {
 variable "availability_zones" {
   description = "Availability zones"
   type        = "list"
+  default     = []
 }
 
 variable "public" {
@@ -30,7 +31,10 @@ variable "public" {
   default     = false
 }
 
+data "aws_availability_zones" "this" {}
+
 locals {
-  default_tags  = "${merge(var.tags, map("Name", var.name))}"
-  subnet_names = "${formatlist("%s-%s", var.name, var.availability_zones)}"
+  default_tags       = "${merge(var.tags, map("Name", var.name))}"
+  availability_zones = "${coalescelist(var.availability_zones, data.aws_availability_zones.this.names)}"
+  subnet_names       = "${formatlist("%s-%s", var.name, local.availability_zones)}"
 }

@@ -24,11 +24,10 @@ resource "aws_vpc_dhcp_options_association" "this" {
 module "public_network" {
   source = "./subnet"
 
-  name               = "public"
-  public             = true
-  vpc_id             = "${aws_vpc.this.id}"
-  availability_zones = "${var.public_availability_zones}"
-  cidr_blocks        = "${var.public_cidr_blocks}"
+  name        = "public"
+  public      = true
+  vpc_id      = "${aws_vpc.this.id}"
+  cidr_blocks = "${var.public_cidr_blocks}"
 
   tags = "${local.default_tags}"
 }
@@ -36,10 +35,9 @@ module "public_network" {
 module "private_network" {
   source = "./subnet"
 
-  name               = "private"
-  vpc_id             = "${aws_vpc.this.id}"
-  availability_zones = "${var.private_availability_zones}"
-  cidr_blocks        = "${var.private_cidr_blocks}"
+  name        = "private"
+  vpc_id      = "${aws_vpc.this.id}"
+  cidr_blocks = "${var.private_cidr_blocks}"
 
   tags = "${local.default_tags}"
 }
@@ -47,10 +45,9 @@ module "private_network" {
 module "database_network" {
   source = "./subnet"
 
-  name               = "database"
-  vpc_id             = "${aws_vpc.this.id}"
-  availability_zones = "${var.database_availability_zones}"
-  cidr_blocks        = "${var.database_cidr_blocks}"
+  name        = "database"
+  vpc_id      = "${aws_vpc.this.id}"
+  cidr_blocks = "${var.database_cidr_blocks}"
 
   tags = "${local.default_tags}"
 }

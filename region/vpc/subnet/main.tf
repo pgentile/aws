@@ -2,7 +2,7 @@ resource "aws_subnet" "this" {
   count = "${length(var.cidr_blocks)}"
 
   vpc_id            = "${var.vpc_id}"
-  availability_zone = "${var.availability_zones[count.index]}"
+  availability_zone = "${local.availability_zones[count.index]}"
   cidr_block        = "${var.cidr_blocks[count.index]}"
 
   tags = "${merge(local.default_tags, map("Name", local.subnet_names[count.index]))}"

@@ -26,20 +26,8 @@ variable "public_cidr_blocks" {
   default     = []
 }
 
-variable "private_availability_zones" {
-  description = "Private availability zones"
-  type        = "list"
-  default     = []
-}
-
 variable "private_cidr_blocks" {
   description = "Private CIDR blocks"
-  type        = "list"
-  default     = []
-}
-
-variable "database_availability_zones" {
-  description = "Database availability zones"
   type        = "list"
   default     = []
 }
