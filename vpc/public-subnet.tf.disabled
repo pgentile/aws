@@ -1,0 +1,36 @@
+resource "aws_internet_gateway" "public" {
+  count = "${length(var.public_cidr_blocks) > 0 ? 1 : 0}"
+
+  vpc_id = "${aws_vpc.this.id}"
+  tags   = "${merge(local.default_tags)}"
+}
+
+resource "aws_subnet" "public" {
+  count = "${length(var.public_cidr_blocks)}"
+
+  vpc_id = "${aws_vpc.this.id}"
+
+  availability_zone = "${var.public_availability_zones[count.index]}"
+  cidr_block        = "${var.public_cidr_blocks[count.index]}"
+
+  tags = "${merge(local.default_tags, map("Name", "public"))}"
+}
+
+resource "aws_route_table" "public" {
+  count = "${length(var.public_cidr_blocks) > 0 ? 1 : 0}"
+
+  vpc_id = "${aws_vpc.this.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.public.id}"
+  }
+
+  tags = "${merge(local.default_tags, map("Name", "public"))}"
+}
+
+resource "aws_route_table_association" "public" {
+  count          = "${length(var.public_cidr_blocks)}"
+  subnet_id      = "${element(aws_subnet.public.*.id, count.index)}"
+  route_table_id = "${aws_route_table.public.id}"
+}
