@@ -33,7 +33,7 @@ resource "aws_instance" "ssh_bastion" {
   ami           = "${data.aws_ami.amazon_linux.id}"
   instance_type = "t2.micro"
 
-  key_name = "${aws_key_pair.ssh_key.key_name}"
+  key_name = "${aws_key_pair.ssh.key_name}"
 
   root_block_device {
     volume_size = 8
@@ -47,15 +47,16 @@ resource "aws_instance" "ssh_bastion" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum -y update",
-      "sudo yum-config-manager --enable epel",
-      "sudo yum -y install ansible",
     ]
+
+    //"sudo yum-config-manager --enable epel",
+    //"sudo yum -y install ansible",
 
     connection {
       type        = "ssh"
       host        = "${aws_eip.ssh_bastion.public_ip}"
       user        = "ec2-user"
-      private_key = "${file("${var.ssh_private_key_file}")}"
+      private_key = "${tls_private_key.ssh.private_key_pem}"
     }
   }
 

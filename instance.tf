@@ -17,7 +17,7 @@ resource "aws_instance" "example" {
   associate_public_ip_address = true
 
   subnet_id = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
-  key_name  = "${aws_key_pair.ssh_key.key_name}"
+  key_name  = "${aws_key_pair.ssh.key_name}"
 
   root_block_device {
     volume_size = 8
@@ -36,7 +36,7 @@ resource "aws_instance" "example" {
       type        = "ssh"
       host        = "${self.private_ip}"
       user        = "ec2-user"
-      private_key = "${file("${var.ssh_private_key_file}")}"
+      private_key = "${tls_private_key.ssh.private_key_pem}"
 
       bastion_host = "${aws_eip.ssh_bastion.public_ip}"
     }

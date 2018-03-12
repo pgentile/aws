@@ -24,14 +24,6 @@ variable "my_ip" {
   type        = "string"
 }
 
-variable "ssh_private_key_file" {
-  description = "SSH private key file"
-  default     = "~/.ssh/id_rsa"
-}
-
-variable "ssh_public_key_file" {
-  description = "SSH public key"
-  default     = "~/.ssh/id_rsa.pub"
 variable "enable_load_balancer" {
   description = "Enable load balancer ?"
   default     = false
