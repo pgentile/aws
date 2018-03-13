@@ -47,6 +47,33 @@ ssh -A -o StrictHostKeyChecking=no admin@NAME.eu-west-3.compute.amazonaws.com
 # Then, ssh PRIVATE_IP
 ```
 
+Clés GPG
+========
+
+Pour récupérer les clés GPG :
+
+```
+apt-get install dirmngr --install-recommends 
+```
+
+A faire si blocage par un firewall ou un security group
+
+```
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 
+```
+
+Sinon, ouvrir le port suivant :
+
+```
+11371/tcp
+```
+
+Pour faire :
+
+```
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C36
+```
+
 
 Check my system
 ===============
