@@ -30,7 +30,7 @@ resource "aws_eip_association" "eip_assoc" {
 resource "aws_instance" "ssh_bastion" {
   depends_on = ["aws_internet_gateway.example"]
 
-  ami           = "${data.aws_ami.amazon_linux.id}"
+  ami           = "${data.aws_ami.debian.id}"
   instance_type = "t2.micro"
 
   key_name = "${aws_key_pair.ssh.key_name}"
@@ -44,20 +44,11 @@ resource "aws_instance" "ssh_bastion" {
     device_index         = 0
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo yum -y update",
-    ]
-
-    //"sudo yum-config-manager --enable epel",
-    //"sudo yum -y install ansible",
-
-    connection {
-      type        = "ssh"
-      host        = "${aws_eip.ssh_bastion.public_ip}"
-      user        = "ec2-user"
-      private_key = "${tls_private_key.ssh.private_key_pem}"
-    }
+  connection {
+    type        = "ssh"
+    host        = "${aws_eip.ssh_bastion.public_ip}"
+    user        = "admin"
+    private_key = "${tls_private_key.ssh.private_key_pem}"
   }
 
   tags        = "${local.ssh_bastion_tags}"
@@ -66,7 +57,7 @@ resource "aws_instance" "ssh_bastion" {
 
 output "bastion_ssh_connection_string" {
   description = "Bastion SSH connection string"
-  value       = "${format("ssh -A -o StrictHostKeyChecking=no ec2-user@%s", aws_eip.ssh_bastion.public_ip)}"
+  value       = "${format("ssh -A -o StrictHostKeyChecking=no admin@%s", aws_eip.ssh_bastion.public_ip)}"
 }
 
 output "bastion_public_ip" {

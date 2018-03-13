@@ -42,7 +42,7 @@ See https://blog.octo.com/le-bastion-ssh/
 eval $(ssh-agent -s)
 ssh-add ~/.ssh/id_rsa
 
-ssh -A -o StrictHostKeyChecking=no ec2-user@NAME.eu-west-3.compute.amazonaws.com
+ssh -A -o StrictHostKeyChecking=no admin@NAME.eu-west-3.compute.amazonaws.com
 
 # Then, ssh PRIVATE_IP
 ```

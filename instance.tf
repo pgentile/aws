@@ -3,7 +3,7 @@ resource "aws_instance" "example" {
 
   count = 1
 
-  ami           = "${data.aws_ami.amazon_linux.id}"
+  ami           = "${data.aws_ami.debian.id}"
   instance_type = "t2.micro"
 
   vpc_security_group_ids = [
@@ -23,23 +23,13 @@ resource "aws_instance" "example" {
     volume_size = 8
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo yum -y update",
-      "sudo yum-config-manager --enable epel",
-      "sudo yum -y install ansible",
-      "sudo yum -y install nginx",
-      "sudo service nginx start",
-    ]
+  connection {
+    type        = "ssh"
+    host        = "${self.private_ip}"
+    user        = "admin"
+    private_key = "${tls_private_key.ssh.private_key_pem}"
 
-    connection {
-      type        = "ssh"
-      host        = "${self.private_ip}"
-      user        = "ec2-user"
-      private_key = "${tls_private_key.ssh.private_key_pem}"
-
-      bastion_host = "${aws_eip.ssh_bastion.public_ip}"
-    }
+    bastion_host = "${aws_eip.ssh_bastion.public_ip}"
   }
 
   tags        = "${merge(local.default_tags, map("Name", format("example-%03d", count.index + 1)))}"
@@ -49,11 +39,6 @@ resource "aws_instance" "example" {
 output "example_private_ip" {
   description = "Example private IP"
   value       = "${aws_instance.example.*.private_ip}"
-}
-
-output "example_ssh_connection_string" {
-  description = "Bastion SSH connection string"
-  value       = "${formatlist("ssh -t -A -o StrictHostKeyChecking=no ec2-user@%s ssh %s", aws_eip.ssh_bastion.public_ip, aws_instance.example.*.private_ip)}"
 }
 
 output "example_http_connection_string" {
