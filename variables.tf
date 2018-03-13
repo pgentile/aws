@@ -32,6 +32,8 @@ variable "enable_load_balancer" {
 locals {
   default_tags = {
     Name        = "example"
+    Env         = "TEST"
+    Platform    = "TEST01"
     Provisioner = "terraform"
   }
 }
