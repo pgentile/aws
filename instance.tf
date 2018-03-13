@@ -18,6 +18,7 @@ resource "aws_instance" "example" {
 
   subnet_id = "${element(aws_subnet.public.*.id, count.index % aws_subnet.public.count)}"
   key_name  = "${aws_key_pair.ssh.key_name}"
+  user_data = "${file("./instance-init.sh")}"
 
   root_block_device {
     volume_size = 8
