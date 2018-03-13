@@ -2,6 +2,9 @@
 
 set -e
 
+# Non interractive Debian frontend
+export DEBIAN_FRONTEND=noninteractive
+
 # Update packages
 sudo apt-get update -y
 
@@ -35,22 +38,34 @@ hardened_sshd_config_file=$(tempfile)
 cat >$hardened_sshd_config_file <<EOF
 # Hardened sshd config
 
+# See https://www.ssh.com/ssh/sshd_config/
 AllowTcpForwarding no
+AllowStreamLocalForwarding no
+GatewayPorts no
+PermitTunnel no
+
 ClientAliveCountMax 2
 ClientAliveInterval 300
 Compression no
 LogLevel verbose
-MaxAuthTries 2
 MaxSessions 2
 PermitRootLogin no
 TCPKeepAlive no
 X11Forwarding no
 
+# Disabled for now, because sshd rejects all connection attempts
+# MaxAuthTries 2
+
 # We can do that because we are not the bastion host
 AllowAgentForwarding no
+
 EOF
 
-sudo cat $hardened_sshd_config_file /etc/ssh/sshd_config >/etc/ssh/sshd_config
+# And default config...
+cat /etc/ssh/sshd_config >>$hardened_sshd_config_file
+
+# Generate new sshd config 
+sudo cat $hardened_sshd_config_file >/etc/ssh/sshd_config
 
 # Restart SSH daemon
 sudo systemctl restart sshd
