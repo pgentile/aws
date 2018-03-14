@@ -15,51 +15,45 @@ resource "aws_vpc" "example" {
 
 resource "aws_default_network_acl" "example" {
   default_network_acl_id = "${aws_vpc.example.default_network_acl_id}"
-  tags                   = "${local.default_tags}"
-}
 
-resource "aws_network_acl_rule" "example_ingress_all" {
-  network_acl_id = "${aws_default_network_acl.example.id}"
-  egress         = false
-  rule_number    = 1
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = "${local.ephemeral_ports_start}"
-  to_port        = "${local.ephemeral_ports_end}"
-}
+  ingress {
+    rule_no    = 1
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = "${local.ephemeral_ports_start}"
+    to_port    = "${local.ephemeral_ports_end}"
+  }
 
-resource "aws_network_acl_rule" "example_egress_http_client" {
-  network_acl_id = "${aws_default_network_acl.example.id}"
-  egress         = true
-  rule_number    = 1
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 80
-  to_port        = 80
-}
+  egress {
+    rule_no    = 1
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 80
+    to_port    = 80
+  }
 
-resource "aws_network_acl_rule" "example_egress_https_client" {
-  network_acl_id = "${aws_default_network_acl.example.id}"
-  egress         = true
-  rule_number    = 2
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 443
-  to_port        = 443
-}
+  egress {
+    rule_no    = 2
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 443
+    to_port    = 443
+  }
 
-resource "aws_network_acl_rule" "example_egress_hkp_client" {
-  network_acl_id = "${aws_default_network_acl.example.id}"
-  egress         = true
-  rule_number    = 3
-  protocol       = "tcp"
-  rule_action    = "allow"
-  cidr_block     = "0.0.0.0/0"
-  from_port      = 11371
-  to_port        = 11371
+  // HKP port, to retreive GPG keys
+  egress {
+    rule_no    = 3
+    protocol   = "tcp"
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 11371
+    to_port    = 11371
+  }
+
+  tags = "${local.default_tags}"
 }
 
 resource "aws_default_security_group" "example" {
@@ -67,11 +61,11 @@ resource "aws_default_security_group" "example" {
 
   // SSH server in the VPC
   ingress {
-    description     = "ssh"
-    protocol        = "tcp"
-    security_groups = ["${aws_security_group.ssh_bastion.id}"]
-    from_port       = 22
-    to_port         = 22
+    description = "ssh"
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_network_interface.ssh_bastion.private_ips[0]}/32"]
+    from_port   = 22
+    to_port     = 22
   }
 
   // HTTP clients
@@ -92,7 +86,7 @@ resource "aws_default_security_group" "example" {
     to_port     = 443
   }
 
-  // Get GPG keys
+  // HKP port, to retreive GPG keys
   egress {
     description = "hkp"
     protocol    = "tcp"
@@ -257,6 +251,7 @@ resource "aws_network_acl_rule" "public_egress_https_client" {
   to_port        = 443
 }
 
+// HKP port, to retreive GPG keys
 resource "aws_network_acl_rule" "public_egress_hkp_client" {
   network_acl_id = "${aws_network_acl.public.id}"
   egress         = true
