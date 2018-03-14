@@ -5,6 +5,9 @@ set -e
 # Non interractive Debian frontend
 export DEBIAN_FRONTEND=noninteractive
 
+# Change timezone
+sudo timedatectl set-timezone Europe/Paris
+
 # Update packages
 sudo apt-get update -y
 
