@@ -40,9 +40,11 @@ sudo apt-get install -y ansible lynis
 hardened_sshd_config_file=$(tempfile)
 cat >$hardened_sshd_config_file <<EOF
 # Hardened sshd config
-
 # See https://www.ssh.com/ssh/sshd_config/
-AllowTcpForwarding no
+
+# Can't use this parameter for the SSH bastion
+# AllowTcpForwarding no
+
 AllowStreamLocalForwarding no
 GatewayPorts no
 PermitTunnel no
@@ -57,10 +59,7 @@ TCPKeepAlive no
 X11Forwarding no
 
 # Disabled for now, because sshd rejects all connection attempts
-# MaxAuthTries 2
-
-# We can do that because we are not the bastion host
-AllowAgentForwarding no
+MaxAuthTries 100
 
 EOF
 

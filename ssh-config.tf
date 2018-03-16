@@ -4,7 +4,7 @@ resource "local_file" "ssh_config" {
 }
 
 locals {
-  bastion_public_ip = "${aws_eip.ssh_bastion.public_ip}"
+  bastion_public_ip = "${module.ssh_bastion.public_ip}"
 
   bastion_ssh_config = "${format(
     "Host bastion\n  HostName %s\n  User admin\n  IdentityFile %s\n  ForwardAgent yes\n  AddKeysToAgent yes",
@@ -14,8 +14,8 @@ locals {
 
   host_ssh_config = "${formatlist(
     "Host %s\n  HostName %s\n  User admin\n  IdentityFile %s\n  ProxyJump bastion",
-    aws_instance.example.*.tags.Name,
-    aws_instance.example.*.private_ip,
+    list(module.example_instance.name),
+    list(module.example_instance.private_ip),
     local_file.ssh_private_key.filename
   )}"
 }
@@ -24,6 +24,6 @@ output "ssh_connection_strings" {
   value = "${formatlist(
     "ssh -F %s %s",
     local_file.ssh_config.filename,
-    aws_instance.example.*.tags.Name
+    list(module.example_instance.name)
   )}"
 }

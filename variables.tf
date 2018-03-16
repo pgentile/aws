@@ -29,11 +29,21 @@ variable "enable_load_balancer" {
   default     = false
 }
 
+variable "env" {
+  description = "The env (ex: dev, test, prod)"
+  default     = "test"
+}
+
+variable "platform" {
+  description = "The platform (ex: dev-01, test-01, prod-01)"
+  default     = "test-01"
+}
+
 locals {
   default_tags = {
     Name        = "example"
-    Env         = "TEST"
-    Platform    = "TEST01"
+    Env         = "${var.env}"
+    Platform    = "${var.platform}"
     Provisioner = "terraform"
   }
 }

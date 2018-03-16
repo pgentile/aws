@@ -37,10 +37,10 @@ resource "aws_lb_target_group" "example" {
 }
 
 resource "aws_lb_target_group_attachment" "example" {
-  count = "${var.enable_load_balancer ? aws_instance.example.count : 0}"
+  count = "${var.enable_load_balancer ? 1 : 0}"
 
   target_group_arn = "${aws_lb_target_group.example.arn}"
-  target_id        = "${element(aws_instance.example.*.id, count.index)}"
+  target_id        = "${module.example_instance.id}"
   port             = 80
 }
 
