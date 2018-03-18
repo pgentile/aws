@@ -5,7 +5,7 @@ resource "local_file" "ssh_config" {
 
 locals {
   base_ssh_config = "${format(
-    "IdentityFile %s\nUserKnownHostsFile %s",
+    "IdentityFile %s\nUserKnownHostsFile %s\nStrictHostKeyChecking accept-new",
     local_file.ssh_private_key.filename,
     "${path.module}/output/ssh/known-hosts"
   )}"
