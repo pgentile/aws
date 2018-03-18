@@ -34,6 +34,40 @@ write_files:
     owner: root:root
     content: 'Acquire::Languages "none";'
 
+  - path: /etc/ssh/sshd_config
+    owner: root:root
+    content: |
+      # Hardened sshd config
+      # See https://www.ssh.com/ssh/sshd_config/
+
+      # These params are not the same for an SSH bastion
+      AllowTcpForwarding ${ssh_allow_tcp_forwarding}
+      AllowAgentForwarding ${ssh_allow_agent_forwarding}
+
+      X11Forwarding no
+      AllowStreamLocalForwarding no
+      GatewayPorts no
+      PermitTunnel no
+
+      # Disabled for now, because sshd rejects all connection attempts
+      MaxAuthTries 100
+
+      ClientAliveCountMax 2
+      ClientAliveInterval 300
+      Compression no
+      LogLevel verbose
+      MaxSessions 2
+      PermitRootLogin no
+      TCPKeepAlive no
+
+      UsePAM yes
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+
+      AcceptEnv LANG LC_*
+
+      Subsystem	sftp	/usr/lib/openssh/sftp-server
+
 power_state:
   mode: reboot
   message: Restarting the instance

@@ -31,7 +31,9 @@ data "template_file" "cloud_init" {
   template = "${file("${path.module}/cloud-init.yaml.tpl")}"
 
   vars {
-    name = "${var.name}"
+    name                       = "${var.name}"
+    ssh_allow_tcp_forwarding   = "${var.ssh_allow_tcp_forwarding}"
+    ssh_allow_agent_forwarding = "${var.ssh_allow_agent_forwarding}"
   }
 }
 
