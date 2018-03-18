@@ -16,7 +16,7 @@ resource "aws_instance" "this" {
 
   subnet_id            = "${var.subnet_id}"
   key_name             = "${var.key_name}"
-  user_data            = "${file("${path.module}/instance-init.sh")}"
+  user_data            = "${data.template_file.cloud_init.rendered}"
   iam_instance_profile = "${var.iam_instance_profile_id}"
 
   root_block_device {
@@ -25,6 +25,14 @@ resource "aws_instance" "this" {
 
   tags        = "${local.tags}"
   volume_tags = "${local.tags}"
+}
+
+data "template_file" "cloud_init" {
+  template = "${file("${path.module}/cloud-init.yaml.tpl")}"
+
+  vars {
+    name = "${var.name}"
+  }
 }
 
 // See the Debian doc: https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
