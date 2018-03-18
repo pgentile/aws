@@ -14,9 +14,10 @@ resource "aws_instance" "this" {
   // Si on n'a pas d'IP public, par contre, impossible de sortir sur Internet
   associate_public_ip_address = true
 
-  subnet_id = "${var.subnet_id}"
-  key_name  = "${var.key_name}"
-  user_data = "${file("${path.module}/instance-init.sh")}"
+  subnet_id            = "${var.subnet_id}"
+  key_name             = "${var.key_name}"
+  user_data            = "${file("${path.module}/instance-init.sh")}"
+  iam_instance_profile = "${var.iam_instance_profile_id}"
 
   root_block_device {
     volume_size = 8

@@ -22,3 +22,8 @@ variable "tags" {
   description = "Tags"
   default     = {}
 }
+
+variable "iam_instance_profile_id" {
+  description = "IAM instance profile ID"
+  default     = ""
+}
