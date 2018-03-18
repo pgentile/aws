@@ -10,6 +10,8 @@ bootcmd:
   # Install required packages for cloud-init APT management
   - 'apt-get update'
   - 'apt-get install -y apt-transport-https dirmngr'
+  # Docker requires to install its GPG key like that
+  - 'curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -'
 
 apt:
   preserve_sources_list: True
@@ -18,6 +20,8 @@ apt:
       source: 'deb https://packages.cisofy.com/community/lynis/deb/ $RELEASE main'
       keyid: 'C80E383C3DE9F082E01391A0366C67DE91CA5D5F'
       keyserver: 'keyserver.ubuntu.com'
+    docker:
+      source: 'deb [arch=amd64] https://download.docker.com/linux/debian $RELEASE stable'
 
 package_update: true
 package_upgrade: true
@@ -29,6 +33,7 @@ packages:
   - lynis
   - debsecan
   - ack
+  - docker-ce
 
 write_files:
   - path: /etc/apt/apt.conf.d/99disable-translations
