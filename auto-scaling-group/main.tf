@@ -3,17 +3,32 @@ locals {
 }
 
 resource "aws_autoscaling_group" "this" {
-  name                 = "${var.name}"
+  name_prefix          = "${var.name}-"
   min_size             = 1
   max_size             = 1
   launch_configuration = "${aws_launch_configuration.this.name}"
   vpc_zone_identifier  = ["${var.subnet_ids}"]
 
+  enabled_metrics = [
+    "GroupMinSize",
+    "GroupMaxSize",
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupStandbyInstances",
+    "GroupTerminatingInstances",
+    "GroupTotalInstances",
+  ]
+
   tags = ["${concat(var.tags, local.extra_tags)}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_launch_configuration" "this" {
-  name                 = "${var.name}"
+  name_prefix          = "${var.name}-"
   instance_type        = "t2.micro"
   image_id             = "${module.instance_config.ami_id}"
   iam_instance_profile = "${var.iam_instance_profile_id}"
@@ -33,8 +48,25 @@ resource "aws_launch_configuration" "this" {
   root_block_device {
     volume_size = 8
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 module "instance_config" {
   source = "../instance-config"
+}
+
+data "aws_instances" "this" {
+  depends_on = ["aws_autoscaling_group.this"]
+
+  filter {
+    name   = "instance-state-name"
+    values = ["running"]
+  }
+
+  instance_tags {
+    "AutoscalingGroup" = "${var.name}"
+  }
 }

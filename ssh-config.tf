@@ -1,5 +1,5 @@
 resource "local_file" "ssh_config" {
-  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n"
+  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n\n${join("\n\n", local.all_hosts_ssh_config)}\n"
   filename = "${path.module}/output/ssh/config"
 }
 
@@ -10,10 +10,16 @@ locals {
     "${path.module}/output/ssh/known-hosts"
   )}"
 
-  all_hosts_ssh_config = "Host *\n  User admin\n  ProxyJump bastion"
+  all_hosts_ssh_config = "${formatlist(
+    "Host %s\n  User %s\n  ProxyJump %s",
+    module.example_auto_scaled.instance_private_ips,
+    module.example_auto_scaled.instance_admin_username,
+    module.ssh_bastion.name
+  )}"
 
   bastion_ssh_config = "${format(
-    "Host bastion\n  HostName %s\n  User %s\n  ForwardAgent yes\n  AddKeysToAgent yes",
+    "Host %s\n  HostName %s\n  User %s\n  ForwardAgent yes\n  AddKeysToAgent yes",
+    module.ssh_bastion.name,
     module.ssh_bastion.public_ip,
     module.ssh_bastion.admin_username
   )}"
@@ -36,7 +42,16 @@ resource "local_file" "ssh_public_key" {
 
 output "ssh_bastion_connection_string" {
   value = "${format(
-    "ssh -F %s bastion",
-    local_file.ssh_config.filename
+    "ssh -F %s %s",
+    local_file.ssh_config.filename,
+    module.ssh_bastion.name
+  )}"
+}
+
+output "ssh_connection_strings" {
+  value = "${formatlist(
+    "ssh -F %s %s",
+    local_file.ssh_config.filename,
+    module.example_auto_scaled.instance_private_ips
   )}"
 }

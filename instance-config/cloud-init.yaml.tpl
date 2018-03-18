@@ -2,10 +2,7 @@
 debug:
   verbose: true
 
-preserve_hostname: ${hostname == "" ? "true" : "false"}
-hostname: '${hostname}'
-
-manage_etc_hosts: ${hostname == "" ? "localhost" : "true"}
+${hostname != "" ? "hostname: ${hostname}": ""} 
 
 timezone: Europe/Paris
 
@@ -26,6 +23,8 @@ package_update: true
 package_upgrade: true
 
 packages:
+  - zip
+  - unzip
   - jq
   - lynis
   - debsecan
