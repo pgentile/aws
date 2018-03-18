@@ -2,8 +2,10 @@
 debug:
   verbose: true
 
-preserve_hostname: false
-hostname: ${name}
+preserve_hostname: ${hostname == "" ? "true" : "false"}
+hostname: '${hostname}'
+
+manage_etc_hosts: ${hostname == "" ? "localhost" : "true"}
 
 timezone: Europe/Paris
 

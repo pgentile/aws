@@ -3,10 +3,10 @@ locals {
 }
 
 resource "aws_instance" "this" {
-  ami           = "${data.aws_ami.debian.id}"
+  ami           = "${module.instance_config.ami_id}"
   instance_type = "t2.micro"
 
-  vpc_security_group_ids = ["${var.vpc_security_group_ids}"]
+  vpc_security_group_ids = ["${var.security_group_ids}"]
 
   // Normalement, on ne devrait pas faire ça, mais bon...
   // On ne va pas payer pour un Gatway NAT !
@@ -16,7 +16,7 @@ resource "aws_instance" "this" {
 
   subnet_id            = "${var.subnet_id}"
   key_name             = "${var.key_name}"
-  user_data            = "${data.template_file.cloud_init.rendered}"
+  user_data            = "${module.instance_config.user_data}"
   iam_instance_profile = "${var.iam_instance_profile_id}"
 
   root_block_device {
@@ -27,29 +27,10 @@ resource "aws_instance" "this" {
   volume_tags = "${local.tags}"
 }
 
-data "template_file" "cloud_init" {
-  template = "${file("${path.module}/cloud-init.yaml.tpl")}"
+module "instance_config" {
+  source = "../instance-config"
 
-  vars {
-    name                       = "${var.name}"
-    ssh_allow_tcp_forwarding   = "${var.ssh_allow_tcp_forwarding}"
-    ssh_allow_agent_forwarding = "${var.ssh_allow_agent_forwarding}"
-  }
-}
-
-// See the Debian doc: https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
-data "aws_ami" "debian" {
-  most_recent = true
-
-  owners = ["379101102735"]
-
-  filter {
-    name   = "name"
-    values = ["debian-stretch-hvm-x86_64-gp2-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
+  hostname                   = "${var.name}"
+  ssh_allow_tcp_forwarding   = "yes"
+  ssh_allow_agent_forwarding = "yes"
 }

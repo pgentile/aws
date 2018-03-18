@@ -12,7 +12,7 @@ module "ssh_bastion" {
   ssh_allow_tcp_forwarding   = "yes"
   ssh_allow_agent_forwarding = "yes"
 
-  vpc_security_group_ids = [
+  security_group_ids = [
     "${aws_vpc.example.default_security_group_id}",
     "${aws_security_group.ssh_bastion.id}",
   ]

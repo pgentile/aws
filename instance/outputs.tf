@@ -10,7 +10,7 @@ output "public_ip" {
 
 output "admin_username" {
   description = "Admin username"
-  value       = "admin"
+  value       = "${module.instance_config.admin_username}"
 }
 
 output "name" {

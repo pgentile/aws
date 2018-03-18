@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Instance name"
+  description = "Group name"
   type        = "string"
 }
 
@@ -8,9 +8,9 @@ variable "key_name" {
   type        = "string"
 }
 
-variable "subnet_id" {
-  description = "Subnet ID"
-  type        = "string"
+variable "subnet_ids" {
+  description = "Subnet IDs"
+  type        = "list"
 }
 
 variable "security_group_ids" {
@@ -20,7 +20,7 @@ variable "security_group_ids" {
 
 variable "tags" {
   description = "Tags"
-  default     = {}
+  default     = []
 }
 
 variable "iam_instance_profile_id" {
