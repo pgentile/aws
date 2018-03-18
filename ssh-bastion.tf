@@ -17,12 +17,3 @@ module "ssh_bastion" {
 
   tags = "${local.default_tags}"
 }
-
-output "bastion_ssh_connection_string" {
-  description = "Bastion SSH connection string"
-  value       = "${format("ssh -A -o StrictHostKeyChecking=no admin@%s", module.ssh_bastion.public_ip)}"
-}
-
-output "bastion_public_ip" {
-  value = "${module.ssh_bastion.public_ip}"
-}
