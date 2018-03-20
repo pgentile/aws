@@ -28,6 +28,8 @@ packages:
   - jq
   - lynis
   - debsecan
+  - auditd
+  - sysstat
   - ack
 
 write_files:
