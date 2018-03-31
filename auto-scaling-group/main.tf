@@ -50,11 +50,7 @@ resource "aws_launch_configuration" "this" {
   user_data            = "${module.instance_config.user_data}"
   security_groups      = ["${var.security_group_ids}"]
 
-  // Normalement, on ne devrait pas faire ça, mais bon...
-  // On ne va pas payer pour un Gatway NAT !
-  // Ou alors, il nous faudrait une NAT instance
-  // Si on n'a pas d'IP public, par contre, impossible de sortir sur Internet
-  associate_public_ip_address = true
+  associate_public_ip_address = "${var.associate_public_ip_address}"
 
   // C'est payant, le monitoring avancé... Alors, on le coupe !
   enable_monitoring = false
@@ -71,4 +67,3 @@ resource "aws_launch_configuration" "this" {
 module "instance_config" {
   source = "../instance-config"
 }
-

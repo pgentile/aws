@@ -8,11 +8,7 @@ resource "aws_instance" "this" {
 
   vpc_security_group_ids = ["${var.security_group_ids}"]
 
-  // Normalement, on ne devrait pas faire ça, mais bon...
-  // On ne va pas payer pour un Gatway NAT !
-  // Ou alors, il nous faudrait une NAT instance
-  // Si on n'a pas d'IP public, par contre, impossible de sortir sur Internet
-  associate_public_ip_address = true
+  associate_public_ip_address = "${var.associate_public_ip_address}"
 
   subnet_id            = "${var.subnet_id}"
   key_name             = "${var.key_name}"

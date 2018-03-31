@@ -1,7 +1,3 @@
-locals {
-  ssh_bastion_tags = "${merge(local.default_tags, map("Name", "ssh-bastion"))}"
-}
-
 module "ssh_bastion" {
   source = "./instance"
 
@@ -13,7 +9,7 @@ module "ssh_bastion" {
   ssh_allow_agent_forwarding = "yes"
 
   security_group_ids = [
-    "${aws_vpc.example.default_security_group_id}",
+    "${aws_security_group.base.id}",
     "${aws_security_group.ssh_bastion.id}",
   ]
 

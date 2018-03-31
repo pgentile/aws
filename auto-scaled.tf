@@ -1,14 +1,14 @@
 module "example_auto_scaled" {
   source = "./auto-scaling-group"
 
-  name                    = "example"
-  key_name                = "${aws_key_pair.ssh.key_name}"
-  iam_instance_profile_id = "${aws_iam_instance_profile.ec2.id}"
-  subnet_ids              = ["${aws_subnet.public.*.id}"]
+  name                        = "example"
+  key_name                    = "${aws_key_pair.ssh.key_name}"
+  iam_instance_profile_id     = "${aws_iam_instance_profile.ec2.id}"
+  subnet_ids                  = ["${aws_subnet.private.*.id}"]
+  associate_public_ip_address = false
 
   security_group_ids = [
-    "${aws_vpc.example.default_security_group_id}",
-    "${aws_security_group.http_server.id}",
+    "${aws_security_group.base.id}",
   ]
 
   tags = "${local.default_tags}"

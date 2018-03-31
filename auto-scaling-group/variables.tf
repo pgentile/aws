@@ -8,6 +8,11 @@ variable "key_name" {
   type        = "string"
 }
 
+variable "associate_public_ip_address" {
+  description = "Associer une IP publique à l'instance"
+  default     = true
+}
+
 variable "subnet_ids" {
   description = "Subnet IDs"
   type        = "list"
