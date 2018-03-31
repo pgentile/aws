@@ -1,5 +1,5 @@
 resource "local_file" "ssh_config" {
-  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n\n${join("\n\n", local.all_hosts_ssh_config)}\n"
+  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n\n${local.any_host_ssh_config}\n\n${join("\n\n", local.all_hosts_ssh_config)}\n"
   filename = "${path.module}/output/ssh/config"
 }
 
@@ -22,6 +22,13 @@ locals {
     module.ssh_bastion.name,
     module.ssh_bastion.public_ip,
     module.ssh_bastion.admin_username
+  )}"
+
+  any_host_ssh_config = "${format(
+    "Host ip-*.%s.compute.internal\n  User %s\n  ProxyJump %s",
+    var.region,
+    "admin",
+    module.ssh_bastion.name
   )}"
 }
 

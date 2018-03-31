@@ -15,7 +15,9 @@ output "launch_configuration_id" {
 
 output "instance_private_ips" {
   description = "Instance private IPs"
-  value       = ["${data.aws_instances.this.private_ips}"]
+  value       = []
+
+  // value       = ["${data.aws_instances.this.private_ips}"]
 }
 
 output "instance_admin_username" {

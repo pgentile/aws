@@ -11,21 +11,5 @@ module "example_auto_scaled" {
     "${aws_security_group.http_server.id}",
   ]
 
-  tags = [
-    {
-      key                 = "Env"
-      value               = "${local.default_tags["Env"]}"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Platform"
-      value               = "${local.default_tags["Platform"]}"
-      propagate_at_launch = true
-    },
-    {
-      key                 = "Provisioner"
-      value               = "${local.default_tags["Provisioner"]}"
-      propagate_at_launch = true
-    },
-  ]
+  tags = "${local.default_tags}"
 }

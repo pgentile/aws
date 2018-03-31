@@ -20,7 +20,7 @@ variable "security_group_ids" {
 
 variable "tags" {
   description = "Tags"
-  default     = []
+  default     = {}
 }
 
 variable "iam_instance_profile_id" {

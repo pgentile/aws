@@ -1,5 +1,19 @@
 locals {
-  extra_tags = "${list(map("key", "AutoscalingGroup", "value", var.name, "propagate_at_launch", true))}"
+  tags       = "${merge(var.tags, map("AutoscalingGroup", var.name))}"
+  tag_keys   = "${keys(local.tags)}"
+  tag_values = "${values(local.tags)}"
+}
+
+// We use the null_data_source to create the tag list from the map
+// The tags will be propagated to the instance
+data "null_data_source" "propagated_tags" {
+  count = "${length(local.tags)}"
+
+  inputs = {
+    key                 = "${local.tag_keys[count.index]}"
+    value               = "${local.tag_values[count.index]}"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_autoscaling_group" "this" {
@@ -20,7 +34,7 @@ resource "aws_autoscaling_group" "this" {
     "GroupTotalInstances",
   ]
 
-  tags = ["${concat(var.tags, local.extra_tags)}"]
+  tags = ["${data.null_data_source.propagated_tags.*.outputs}"]
 
   lifecycle {
     create_before_destroy = true
@@ -58,15 +72,3 @@ module "instance_config" {
   source = "../instance-config"
 }
 
-data "aws_instances" "this" {
-  depends_on = ["aws_autoscaling_group.this"]
-
-  filter {
-    name   = "instance-state-name"
-    values = ["running"]
-  }
-
-  instance_tags {
-    "AutoscalingGroup" = "${var.name}"
-  }
-}
