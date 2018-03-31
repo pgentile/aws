@@ -14,14 +14,34 @@ module "vpc" {
   tags       = "${var.tags}"
 }
 
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = "${module.vpc.id}"
+
+  tags = "${local.tags}"
+}
+
 module "public_subnet" {
   source = "./subnet"
 
-  name   = "public"
-  vpc_id = "${module.vpc.id}"
+  name                = "public"
+  vpc_id              = "${module.vpc.id}"
+  internet_gateway_id = "${aws_internet_gateway.internet_gateway.id}"
 
   availability_zones = ["${var.availability_zones}"]
   cidr_blocks        = ["${var.public_subnet_cidr_blocks}"]
+
+  tags = "${var.tags}"
+}
+
+module "bastion_subnet" {
+  source = "./subnet"
+
+  name                = "bastion"
+  vpc_id              = "${module.vpc.id}"
+  internet_gateway_id = "${aws_internet_gateway.internet_gateway.id}"
+
+  availability_zones = ["${var.availability_zones}"]
+  cidr_blocks        = ["${var.bastion_subnet_cidr_blocks}"]
 
   tags = "${var.tags}"
 }
@@ -40,14 +60,16 @@ module "private_subnet" {
   tags = "${var.tags}"
 }
 
-resource "aws_internet_gateway" "internet_gateway" {
+module "database_subnet" {
+  source = "./subnet"
+
+  name   = "database"
   vpc_id = "${module.vpc.id}"
 
-  tags = "${local.tags}"
-}
+  availability_zones = ["${var.availability_zones}"]
+  cidr_blocks        = ["${var.database_subnet_cidr_blocks}"]
 
-resource "aws_route" "internet_gateway" {
-  route_table_id         = "${module.public_subnet.route_table_id}"
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.internet_gateway.id}"
+  allow_internal_subnet_traffic = true
+
+  tags = "${var.tags}"
 }

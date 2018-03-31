@@ -38,3 +38,8 @@ variable "ephemeral_ports" {
     end   = 61000
   }
 }
+
+variable "internet_gateway_id" {
+  description = "Internet gateway ID"
+  default     = ""
+}

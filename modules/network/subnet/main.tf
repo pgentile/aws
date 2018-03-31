@@ -32,6 +32,14 @@ resource "aws_route_table_association" "this" {
   route_table_id = "${aws_route_table.this.id}"
 }
 
+resource "aws_route" "internet_gateway" {
+  count = "${var.internet_gateway_id == "" ? 0 : 1}"
+
+  route_table_id         = "${aws_route_table.this.id}"
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = "${var.internet_gateway_id}"
+}
+
 resource "aws_network_acl" "this" {
   vpc_id     = "${var.vpc_id}"
   subnet_ids = ["${aws_subnet.this.*.id}"]
