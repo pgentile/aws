@@ -40,10 +40,10 @@ variable "platform" {
 }
 
 locals {
-  default_tags = {
-    Name        = "example"
+  env_tags = {
     Env         = "${var.env}"
-    Platform    = "${var.platform}"
     Provisioner = "terraform"
   }
+
+  platform_tags = "${merge(local.env_tags, map("Platform", var.platform))}"
 }
