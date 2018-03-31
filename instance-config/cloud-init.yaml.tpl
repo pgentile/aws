@@ -11,6 +11,12 @@ bootcmd:
   - 'apt-get update'
   - 'apt-get install -y apt-transport-https dirmngr'
 
+runcmd:
+  - 'chmod go-x /usr/bin/x86_64-linux-gnu-as'
+
+# USB blacklist : sudo vim /etc/modprobe.d/blacklist.conf
+# Content : blacklist usb-storage
+
 apt:
   preserve_sources_list: True
   sources:
@@ -27,7 +33,9 @@ packages:
   - unzip
   - jq
   - lynis
+  - acct
   - debsecan
+  - arpwatch
   - auditd
   - sysstat
   - ack
@@ -36,6 +44,20 @@ write_files:
   - path: /etc/apt/apt.conf.d/99disable-translations
     owner: root:root
     content: 'Acquire::Languages "none";'
+  
+  - path: /etc/issue
+    owner: root:root
+    content: |
+      ////////////////////////////////////////////////
+      // Example.org Corp. -- Authorized users only //
+      ////////////////////////////////////////////////
+
+  - path: /etc/issue.net
+    owner: root:root
+    content: |
+      ////////////////////////////////////////////////
+      // Example.org Corp. -- Authorized users only //
+      ////////////////////////////////////////////////
 
   - path: /etc/ssh/sshd_config
     owner: root:root
@@ -70,6 +92,9 @@ write_files:
       AcceptEnv LANG LC_*
 
       Subsystem	sftp	/usr/lib/openssh/sftp-server
+
+      # The legal banner
+      Banner /etc/issue.net
 
 power_state:
   mode: reboot
