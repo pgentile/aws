@@ -1,17 +1,14 @@
-resource "aws_lb" "example" {
-  count = "${var.enable_load_balancer ? 1 : 0}"
+resource "aws_lb" "load_balancer" {
+  name = "load-balancer"
 
-  name    = "example"
-  subnets = ["${aws_subnet.public.*.id}"]
+  load_balancer_type = "application"
+  subnets            = ["${module.network.subnet_ids}"]
+  security_groups    = ["${module.security_group.security_group_id}"]
 
-  security_groups = [
-    "${aws_vpc.example.default_security_group_id}",
-    "${aws_security_group.http_server.id}",
-  ]
-
-  tags = "${local.default_tags}"
+  tags = "${local.platform_tags}"
 }
 
+/*
 resource "aws_lb_listener" "example" {
   count = "${var.enable_load_balancer ? 1 : 0}"
 
@@ -43,6 +40,8 @@ resource "aws_lb_target_group_attachment" "example" {
   target_id        = "${module.example_instance.id}"
   port             = 80
 }
+*/
+
 
 /*
 output "example_lb_url" {

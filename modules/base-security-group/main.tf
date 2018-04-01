@@ -16,6 +16,16 @@ resource "aws_security_group_rule" "base_ingress_allowed" {
   cidr_blocks = ["${var.allowed_cidr_blocks}"]
 }
 
+resource "aws_security_group_rule" "base_ingress_self" {
+  security_group_id = "${aws_security_group.this.id}"
+
+  type      = "ingress"
+  self      = true
+  protocol  = -1
+  from_port = -1
+  to_port   = -1
+}
+
 resource "aws_security_group_rule" "base_egress_all" {
   security_group_id = "${aws_security_group.this.id}"
 
