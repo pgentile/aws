@@ -8,45 +8,28 @@ resource "aws_lb" "load_balancer" {
   tags = "${local.platform_tags}"
 }
 
-/*
-resource "aws_lb_listener" "example" {
-  count = "${var.enable_load_balancer ? 1 : 0}"
-
-  load_balancer_arn = "${aws_lb.example.arn}"
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = "${aws_lb.load_balancer.arn}"
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_lb_target_group.example.arn}"
+    target_group_arn = "${aws_lb_target_group.default.arn}"
     type             = "forward"
   }
 }
 
-resource "aws_lb_target_group" "example" {
-  count = "${var.enable_load_balancer ? 1 : 0}"
+resource "aws_lb_target_group" "default" {
+  name                 = "http-target-group"
+  port                 = 80
+  protocol             = "HTTP"
+  vpc_id               = "${module.network.vpc_id}"
+  deregistration_delay = 30
 
-  name     = "example-target-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = "${aws_vpc.example.id}"
-
-  tags = "${local.default_tags}"
+  tags = "${local.platform_tags}"
 }
 
-resource "aws_lb_target_group_attachment" "example" {
-  count = "${var.enable_load_balancer ? 1 : 0}"
-
-  target_group_arn = "${aws_lb_target_group.example.arn}"
-  target_id        = "${module.example_instance.id}"
-  port             = 80
-}
-*/
-
-
-/*
 output "example_lb_url" {
   description = "Example load balancer URL"
-  value       = "http://${aws_lb.example.dns_name}"
+  value       = "http://${aws_lb.load_balancer.dns_name}"
 }
-*/
-
