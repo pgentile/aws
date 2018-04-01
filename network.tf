@@ -1,32 +1,16 @@
-locals {
-  private_subnet_cidr_block  = "${cidrsubnet(var.cidr_block, 2, 0)}"
-  public_subnet_cidr_block   = "${cidrsubnet(var.cidr_block, 2, 1)}"
-  database_subnet_cidr_block = "${cidrsubnet(var.cidr_block, 2, 2)}"
-}
-
 module "network" {
-  source = "./modules/network"
+  source = "./modules/simple-network"
 
-  name       = "${var.env}"
-  cidr_block = "${var.cidr_block}"
+  name               = "${var.env}"
+  cidr_block         = "${var.cidr_block}"
+  availability_zones = ["${var.availability_zones}"]
 
-  public_subnet_cidr_blocks = [
-    "${cidrsubnet(local.public_subnet_cidr_block, 2, 0)}",
-    "${cidrsubnet(local.public_subnet_cidr_block, 2, 1)}",
-    "${cidrsubnet(local.public_subnet_cidr_block, 2, 2)}",
+  subnet_cidr_blocks = [
+    "${cidrsubnet(var.cidr_block, 1, 0)}",
+    "${cidrsubnet(var.cidr_block, 1, 1)}",
   ]
 
-  private_subnet_cidr_blocks = [
-    "${cidrsubnet(local.private_subnet_cidr_block, 2, 0)}",
-    "${cidrsubnet(local.private_subnet_cidr_block, 2, 1)}",
-    "${cidrsubnet(local.private_subnet_cidr_block, 2, 2)}",
-  ]
-
-  database_subnet_cidr_blocks = [
-    "${cidrsubnet(local.database_subnet_cidr_block, 2, 0)}",
-    "${cidrsubnet(local.database_subnet_cidr_block, 2, 1)}",
-    "${cidrsubnet(local.database_subnet_cidr_block, 2, 2)}",
-  ]
+  allowed_cidr_blocks = ["${var.my_ip}/32"]
 
   tags = "${local.env_tags}"
 }
