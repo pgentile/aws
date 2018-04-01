@@ -4,7 +4,7 @@ locals {
   }
 
   default_resource_name_tags = {
-    Name = "default-${var.name}"
+    Name = "default"
   }
 
   tags                  = "${merge(var.tags, local.name_tags)}"

@@ -13,11 +13,6 @@ variable "public_subnet_cidr_blocks" {
   default     = []
 }
 
-variable "bastion_subnet_cidr_blocks" {
-  description = "CIDR block of the bastion subnet"
-  default     = []
-}
-
 variable "private_subnet_cidr_blocks" {
   description = "CIDR block of the private subnet"
   default     = []
@@ -31,6 +26,7 @@ variable "database_subnet_cidr_blocks" {
 variable "availability_zones" {
   description = "AWS availability zones"
   type        = "list"
+  default     = []
 }
 
 variable "tags" {

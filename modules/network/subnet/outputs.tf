@@ -12,3 +12,8 @@ output "network_acl_id" {
   description = "Network ACL ID"
   value       = "${aws_network_acl.this.id}"
 }
+
+output "cidr_blocks" {
+  description = "CIDR blocks of each subnet"
+  value       = "${var.cidr_blocks}"
+}

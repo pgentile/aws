@@ -34,12 +34,17 @@ variable "ephemeral_ports" {
   // Linux ephemeral ports
   // See https://www.ncftp.com/ncftpd/doc/misc/ephemeral_ports.html#Linux
   default = {
-    start = 32768
-    end   = 61000
+    start = 1024
+    end   = 65535
   }
 }
 
 variable "internet_gateway_id" {
   description = "Internet gateway ID"
   default     = ""
+}
+
+variable "allowed_ports" {
+  description = "Allowed ports"
+  default     = []
 }

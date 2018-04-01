@@ -50,7 +50,8 @@ resource "aws_network_acl" "this" {
 // Subnet internal traffic
 
 resource "aws_network_acl_rule" "ingress_internal_subnet_traffic" {
-  count          = "${var.allow_internal_subnet_traffic ? length(var.cidr_blocks) : 0}"
+  count = "${var.allow_internal_subnet_traffic ? length(var.cidr_blocks) : 0}"
+
   network_acl_id = "${aws_network_acl.this.id}"
   egress         = false
   rule_number    = "${9000 + count.index}"
@@ -67,6 +68,21 @@ resource "aws_network_acl_rule" "egress_internal_subnet_traffic" {
   protocol       = -1
   rule_action    = "allow"
   cidr_block     = "${element(var.cidr_blocks, count.index)}"
+}
+
+// Open allowed ports
+
+resource "aws_network_acl_rule" "allowed_ports" {
+  count = "${length(var.allowed_ports)}"
+
+  network_acl_id = "${aws_network_acl.this.id}"
+  egress         = false
+  rule_number    = "${1 + count.index}"
+  protocol       = "${lookup(var.allowed_ports[count.index], "protocol", "tcp")}"
+  rule_action    = "allow"
+  cidr_block     = "${lookup(var.allowed_ports[count.index], "cidr_block")}"
+  from_port      = "${lookup(var.allowed_ports[count.index], "port")}"
+  to_port        = "${lookup(var.allowed_ports[count.index], "port")}"
 }
 
 // External calls to HTTP / HTTPS / HKP services
@@ -122,6 +138,30 @@ resource "aws_network_acl_rule" "ingress_ephemeral_udp" {
   network_acl_id = "${aws_network_acl.this.id}"
   egress         = false
   rule_number    = 9401
+  protocol       = "udp"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"
+  from_port      = "${var.ephemeral_ports["start"]}"
+  to_port        = "${var.ephemeral_ports["end"]}"
+}
+
+// Ephemeral ports for returning traffic
+
+resource "aws_network_acl_rule" "egress_ephemeral_tcp" {
+  network_acl_id = "${aws_network_acl.this.id}"
+  egress         = true
+  rule_number    = 9402
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"
+  from_port      = "${var.ephemeral_ports["start"]}"
+  to_port        = "${var.ephemeral_ports["end"]}"
+}
+
+resource "aws_network_acl_rule" "egress_ephemeral_udp" {
+  network_acl_id = "${aws_network_acl.this.id}"
+  egress         = true
+  rule_number    = 9403
   protocol       = "udp"
   rule_action    = "allow"
   cidr_block     = "0.0.0.0/0"

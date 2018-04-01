@@ -1,9 +1,16 @@
+data "aws_availability_zones" "az" {}
+
 locals {
   name_tags = {
     Name = "${var.name}"
   }
 
   tags = "${merge(var.tags, local.name_tags)}"
+
+  availability_zones = "${sort(coalescelist(
+    var.availability_zones,
+    data.aws_availability_zones.az.names
+  ))}"
 }
 
 module "vpc" {
@@ -23,27 +30,14 @@ resource "aws_internet_gateway" "internet_gateway" {
 module "public_subnet" {
   source = "./subnet"
 
-  name                = "public"
-  vpc_id              = "${module.vpc.id}"
+  name   = "public"
+  vpc_id = "${module.vpc.id}"
+
   internet_gateway_id = "${aws_internet_gateway.internet_gateway.id}"
 
-  availability_zones = ["${var.availability_zones}"]
+  availability_zones = ["${local.availability_zones}"]
   cidr_blocks        = ["${var.public_subnet_cidr_blocks}"]
-
-  tags = "${var.tags}"
-}
-
-module "bastion_subnet" {
-  source = "./subnet"
-
-  name                = "bastion"
-  vpc_id              = "${module.vpc.id}"
-  internet_gateway_id = "${aws_internet_gateway.internet_gateway.id}"
-
-  availability_zones = ["${var.availability_zones}"]
-  cidr_blocks        = ["${var.bastion_subnet_cidr_blocks}"]
-
-  tags = "${var.tags}"
+  tags               = "${var.tags}"
 }
 
 module "private_subnet" {
@@ -52,7 +46,7 @@ module "private_subnet" {
   name   = "private"
   vpc_id = "${module.vpc.id}"
 
-  availability_zones = ["${var.availability_zones}"]
+  availability_zones = ["${local.availability_zones}"]
   cidr_blocks        = ["${var.private_subnet_cidr_blocks}"]
 
   allow_internal_subnet_traffic = true
@@ -66,7 +60,7 @@ module "database_subnet" {
   name   = "database"
   vpc_id = "${module.vpc.id}"
 
-  availability_zones = ["${var.availability_zones}"]
+  availability_zones = ["${local.availability_zones}"]
   cidr_blocks        = ["${var.database_subnet_cidr_blocks}"]
 
   allow_internal_subnet_traffic = true
