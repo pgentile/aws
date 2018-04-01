@@ -10,7 +10,7 @@ variable "key_name" {
 
 variable "associate_public_ip_address" {
   description = "Associer une IP publique à l'instance"
-  default     = true
+  default     = false
 }
 
 variable "subnet_id" {

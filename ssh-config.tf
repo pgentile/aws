@@ -1,5 +1,5 @@
 resource "local_file" "ssh_config" {
-  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n\n${local.any_host_ssh_config}\n\n${join("\n\n", local.all_hosts_ssh_config)}\n"
+  content  = "${local.base_ssh_config}\n\n${local.bastion_ssh_config}\n\n${local.any_host_ssh_config}\n"
   filename = "${path.module}/output/ssh/config"
 }
 
@@ -8,13 +8,6 @@ locals {
     "IdentityFile %s\nUserKnownHostsFile %s\nStrictHostKeyChecking accept-new",
     local_file.ssh_private_key.filename,
     "${path.module}/output/ssh/known-hosts"
-  )}"
-
-  all_hosts_ssh_config = "${formatlist(
-    "Host %s\n  User %s\n  ProxyJump %s",
-    module.example_auto_scaled.instance_private_ips,
-    module.example_auto_scaled.instance_admin_username,
-    module.ssh_bastion.name
   )}"
 
   bastion_ssh_config = "${format(
@@ -52,13 +45,5 @@ output "ssh_bastion_connection_string" {
     "ssh -F %s %s",
     local_file.ssh_config.filename,
     module.ssh_bastion.name
-  )}"
-}
-
-output "ssh_connection_strings" {
-  value = "${formatlist(
-    "ssh -F %s %s",
-    local_file.ssh_config.filename,
-    module.example_auto_scaled.instance_private_ips
   )}"
 }
