@@ -14,3 +14,13 @@ module "network" {
 
   tags = "${local.env_tags}"
 }
+
+module "security_group" {
+  source = "./modules/base-security-group"
+
+  name                = "base"
+  vpc_id              = "${module.network.vpc_id}"
+  allowed_cidr_blocks = ["${var.my_ip}/32"]
+
+  tags = "${local.env_tags}"
+}
