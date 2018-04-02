@@ -1,11 +1,12 @@
 resource "aws_lb" "load_balancer" {
+  name = "${var.platform}"
+  tags = "${local.platform_tags}"
+
   name = "load-balancer"
 
   load_balancer_type = "application"
   subnets            = ["${module.network.subnet_ids}"]
-  security_groups    = ["${module.security_group.security_group_id}"]
-
-  tags = "${local.platform_tags}"
+  security_groups    = ["${module.base_security_group.id}"]
 }
 
 resource "aws_lb_listener" "http" {
@@ -20,16 +21,16 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_target_group" "default" {
-  name                 = "http-target-group"
+  name = "${var.platform}"
+  tags = "${local.platform_tags}"
+
   port                 = 80
   protocol             = "HTTP"
   vpc_id               = "${module.network.vpc_id}"
   deregistration_delay = 30
-
-  tags = "${local.platform_tags}"
 }
 
-output "example_lb_url" {
+output "load_balancer_url" {
   description = "Example load balancer URL"
   value       = "http://${aws_lb.load_balancer.dns_name}"
 }

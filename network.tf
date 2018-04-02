@@ -1,7 +1,9 @@
 module "network" {
   source = "./modules/simple-network"
 
-  name               = "${var.env}"
+  name = "${var.env}"
+  tags = "${local.env_tags}"
+
   cidr_block         = "${var.cidr_block}"
   availability_zones = ["${var.availability_zones}"]
 
@@ -11,16 +13,14 @@ module "network" {
   ]
 
   allowed_cidr_blocks = ["${var.my_ip}/32"]
-
-  tags = "${local.env_tags}"
 }
 
-module "security_group" {
+module "base_security_group" {
   source = "./modules/base-security-group"
 
-  name                = "base"
+  name = "${var.env}-base"
+  tags = "${local.env_tags}"
+
   vpc_id              = "${module.network.vpc_id}"
   allowed_cidr_blocks = ["${var.my_ip}/32"]
-
-  tags = "${local.env_tags}"
 }

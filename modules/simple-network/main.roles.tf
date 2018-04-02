@@ -1,5 +1,5 @@
 resource "aws_iam_role" "flow_logs" {
-  name               = "flow-logs-${var.name}"
+  name               = "${var.name}-flow-logs"
   description        = "Flow logs for VPC ${var.name}"
   assume_role_policy = "${data.aws_iam_policy_document.assume_flow_logs.json}"
 }
@@ -16,12 +16,15 @@ data "aws_iam_policy_document" "assume_flow_logs" {
 }
 
 resource "aws_iam_policy" "publish_flow_logs" {
-  name        = "publish-vpc-flow-logs-${var.name}"
+  name        = "${var.name}-publish-vpc-flow-logs"
   description = "Publish logs of VPC ${var.name} to Cloudwatch"
 
   policy = "${data.aws_iam_policy_document.publish_flow_logs.json}"
 }
 
+// The role logs:CreateLogGroup is removed.
+// Only the admin shoud create new log groups.
+// arn:aws:logs:region:*:* ???
 data "aws_iam_policy_document" "publish_flow_logs" {
   statement {
     effect    = "Allow"

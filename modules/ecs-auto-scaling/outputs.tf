@@ -8,7 +8,12 @@ output "launch_configuration_id" {
   value       = "${aws_launch_configuration.this.id}"
 }
 
-output "instance_admin_username" {
+output "instance_username" {
   description = "Admin username of instances"
   value       = "ec2-user"
+}
+
+output "cluster_arn" {
+  description = "Cluster ARN"
+  value       = "${aws_ecs_cluster.this.arn}"
 }
