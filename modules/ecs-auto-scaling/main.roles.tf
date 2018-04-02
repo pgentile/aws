@@ -49,36 +49,6 @@ resource "aws_iam_role_policy_attachment" "publish_cloudwatch_logs" {
   policy_arn = "${aws_iam_policy.publish_cloudwatch_logs.arn}"
 }
 
-// Access to the S3 bucket that contains scripts
-
-/*
-resource "aws_iam_policy" "access_instance_config_s3" {
-  name        = "${var.name}-access-instance-config-s3"
-  description = "Access the S3 that contains instance config of ${var.name}"
-
-  policy = "${data.aws_iam_policy_document.access_instance_config_s3.json}"
-}
-
-data "aws_iam_policy_document" "access_instance_config_s3" {
-  statement {
-    effect    = "Allow"
-    resources = ["${var.instance_config_s3_bucket_arn}"]
-    actions   = ["s3:List*"]
-  }
-
-  statement {
-    effect    = "Allow"
-    resources = ["${var.instance_config_s3_bucket_arn}/*"]
-    actions   = ["s3:Get*"]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "access_instance_config_s3" {
-  role       = "${aws_iam_role.ecs.name}"
-  policy_arn = "${aws_iam_policy.access_instance_config_s3.arn}"
-}
-*/
-
 // Access to ECS from EC2
 
 resource "aws_iam_role_policy_attachment" "ecs" {

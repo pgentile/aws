@@ -28,14 +28,21 @@ variable "instance_config_s3_bucket_id" {
   type        = "string"
 }
 
-variable "instance_config_s3_bucket_arn" {
-  description = "Instance S3 bucket ARN"
-  type        = "string"
-}
-
 variable "instance_config_s3_domain_name" {
   description = "Instance S3 domain name"
   type        = "string"
+}
+
+variable "min_size" {
+  default = "1"
+}
+
+variable "max_size" {
+  default = "1"
+}
+
+variable "desired_capacity" {
+  default = "1"
 }
 
 variable "tags" {

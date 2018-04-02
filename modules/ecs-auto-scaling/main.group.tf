@@ -18,10 +18,12 @@ data "null_data_source" "propagated_tags" {
 
 resource "aws_autoscaling_group" "this" {
   name_prefix          = "${var.name}-"
-  min_size             = 1
-  max_size             = 1
   launch_configuration = "${aws_launch_configuration.this.name}"
   vpc_zone_identifier  = ["${var.subnet_ids}"]
+
+  min_size         = "${var.min_size}"
+  max_size         = "${var.max_size}"
+  desired_capacity = "${var.desired_capacity}"
 
   enabled_metrics = [
     "GroupMinSize",
