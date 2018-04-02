@@ -1,6 +1,4 @@
 #cloud-config
-debug:
-  verbose: true
 
 timezone: Europe/Paris
 
