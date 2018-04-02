@@ -30,36 +30,35 @@ cat >/etc/awslogs/awslogs.conf <<EOF
 state_file = /var/lib/awslogs/agent-state
 
 [/var/log/dmesg]
-datetime_format = %Y-%m-%dT%H:%M:%S%z
 file = /var/log/dmesg
 initial_position = start_of_file
 log_group_name = /var/log/dmesg
 log_stream_name = {instance_id}
 
 [/var/log/messages]
-datetime_format = %Y-%m-%dT%H:%M:%S%z
 file = /var/log/messages
+datetime_format = %b %d %H:%M:%S
 initial_position = start_of_file
 log_group_name = /var/log/messages
 log_stream_name = {instance_id}
 
 [/var/log/docker]
-datetime_format = %Y-%m-%dT%H:%M:%S%z
 file = /var/log/docker
+datetime_format = %Y-%m-%dT%H:%M:%S.%f
 initial_position = start_of_file
 log_group_name = /var/log/docker
 log_stream_name = {instance_id}
 
 [/var/log/ecs/ecs-init.log]
-datetime_format = %Y-%m-%dT%H:%M:%S%z
 file = /var/log/ecs/ecs-init.log
+datetime_format = %Y-%m-%dT%H:%M:%SZ
 initial_position = start_of_file
 log_group_name = /var/log/ecs/ecs-init.log
 log_stream_name = {instance_id}
 
 [/var/log/ecs/ecs-agent.log]
-datetime_format = %Y-%m-%dT%H:%M:%S%z
 file = /var/log/ecs/ecs-agent.log.*
+datetime_format = %Y-%m-%dT%H:%M:%SZ
 initial_position = start_of_file
 log_group_name = /var/log/ecs/ecs-agent.log
 log_stream_name = {instance_id}
