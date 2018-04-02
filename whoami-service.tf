@@ -5,6 +5,10 @@ resource "aws_ecs_task_definition" "whoami" {
 }
 
 resource "aws_ecs_service" "whoami" {
+  // We need to wait for load balancer creation before
+  // association of the service to the load balancer 
+  depends_on = ["aws_lb.load_balancer"]
+
   name            = "whoami"
   cluster         = "${aws_ecs_cluster.cluster.arn}"
   task_definition = "${aws_ecs_task_definition.whoami.arn}"
