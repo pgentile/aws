@@ -18,9 +18,7 @@ packages:
   - lsof
 
 runcmd:
-  - "curl -L -v -f ${instance_script_url} -o /tmp/configure-instance.sh"
-  - "chmod +x /tmp/configure-instance.sh"
-  - "/tmp/configure-instance.sh"
+  - "curl -L -f ${instance_script_url} | bash"
 
 write_files:
   - path: /etc/ecs/ecs.config
