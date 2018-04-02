@@ -25,10 +25,9 @@ resource "aws_iam_policy" "publish_flow_logs" {
 data "aws_iam_policy_document" "publish_flow_logs" {
   statement {
     effect    = "Allow"
-    resources = ["${aws_iam_role.flow_logs.arn}"]
+    resources = ["*"]
 
     actions = [
-      "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
       "logs:DescribeLogGroups",
