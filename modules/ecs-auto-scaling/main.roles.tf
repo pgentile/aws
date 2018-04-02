@@ -29,14 +29,13 @@ resource "aws_iam_policy" "publish_cloudwatch_logs" {
   policy = "${data.aws_iam_policy_document.publish_cloudwatch_logs.json}"
 }
 
-// The role logs:CreateLogGroup is removed.
-// Only the admin shoud create new log groups.
 data "aws_iam_policy_document" "publish_cloudwatch_logs" {
   statement {
     effect    = "Allow"
     resources = ["*"]
 
     actions = [
+      "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
       "logs:DescribeLogGroups",
