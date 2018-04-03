@@ -1,10 +1,6 @@
 locals {
   log_groups = [
-    "/var/log/dmesg",
-    "/var/log/messages",
-    "/var/log/docker",
-    "/var/log/ecs/ecs-init.log",
-    "/var/log/ecs/ecs-agent.log",
+    "coreos-docker-logs",
   ]
 }
 

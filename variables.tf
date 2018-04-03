@@ -24,6 +24,11 @@ variable "my_ip" {
   type        = "string"
 }
 
+variable "etcd_discovery_token" {
+  description = "etcd discovery token for CoreOS instance"
+  type        = "string"
+}
+
 variable "enable_load_balancer" {
   description = "Enable load balancer ?"
   default     = false

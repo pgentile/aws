@@ -10,7 +10,7 @@ locals {
     "${path.module}/output/ssh/known-hosts"
   )}"
 
-  any_host_ssh_config = "Host *.compute.amazonaws.com\n  User ec2-user"
+  any_host_ssh_config = "Host *.compute.amazonaws.com\n  User core"
 }
 
 resource "local_file" "ssh_private_key" {
