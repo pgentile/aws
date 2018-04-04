@@ -17,6 +17,10 @@ etcd:
 
 docker:
   flags:
+    - "--label env=${env}"
+    - "--label platform=${platform}"
+    - "--label region=${region}"
+    # Container logs to AWS
     - "--log-driver=awslogs"
     - "--log-opt awslogs-region=${region}"
     - "--log-opt awslogs-group=coreos-docker-logs"

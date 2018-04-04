@@ -54,6 +54,8 @@ data "template_file" "ignition_config" {
   template = "${file("${path.module}/coreos-config.yaml.tpl")}"
 
   vars {
+    env                  = "${var.env}"
+    platform             = "${var.platform}"
     region               = "${var.region}"
     etcd_discovery_token = "${var.etcd_discovery_token}"
   }
@@ -64,6 +66,11 @@ data "ct_config" "ignition_config" {
   content      = "${data.template_file.ignition_config.rendered}"
   platform     = "ec2"
   pretty_print = false
+}
+
+resource "local_file" "ignition_config" {
+  content  = "${data.ct_config.ignition_config.rendered}"
+  filename = "${path.module}/output/coreos/ignition.json"
 }
 
 // Instance profile
