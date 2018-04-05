@@ -2,6 +2,8 @@
 
 locals {
   coreos_instance_tags = "${merge(local.platform_tags, map("Name", "coreos"))}"
+
+  ignition_json_filename = "${path.module}/output/coreos/ignition.json"
 }
 
 resource "aws_instance" "coreos" {
@@ -58,6 +60,7 @@ data "template_file" "ignition_config" {
     platform             = "${var.platform}"
     region               = "${var.region}"
     etcd_discovery_token = "${var.etcd_discovery_token}"
+    cluster_name         = "${aws_ecs_cluster.default.name}"
   }
 }
 
@@ -70,7 +73,7 @@ data "ct_config" "ignition_config" {
 
 resource "local_file" "ignition_config" {
   content  = "${data.ct_config.ignition_config.rendered}"
-  filename = "${path.module}/output/coreos/ignition.json"
+  filename = "${local.ignition_json_filename}"
 }
 
 // Instance profile
@@ -145,7 +148,12 @@ output "etcd_discovery_token" {
   value       = "${var.etcd_discovery_token}"
 }
 
-output "coreos_public_ip" {
-  description = "CoreOS public IP"
-  value       = "${aws_instance.coreos.public_ip}"
+output "coreos_public_dns" {
+  description = "CoreOS public DNS"
+  value       = "${aws_instance.coreos.public_dns}"
+}
+
+output "ignition_json_filename" {
+  description = "Ignition JSON config filename"
+  value       = "${local.ignition_json_filename}"
 }
