@@ -1,7 +1,10 @@
 // The CoreOS instance
 
 locals {
-  coreos_instance_tags = "${merge(local.platform_tags, map("Name", "coreos"))}"
+  coreos_instance_tags = "${merge(
+    local.platform_tags,
+    map("Name", "coreos", "ConsulAgent", "server")
+  )}"
 
   ignition_json_filename = "${path.module}/output/coreos/ignition.json"
 }
@@ -127,6 +130,75 @@ data "aws_iam_policy_document" "publish_cloudwatch_logs" {
 resource "aws_iam_role_policy_attachment" "publish_cloudwatch_logs" {
   role       = "${aws_iam_role.coreos.name}"
   policy_arn = "${aws_iam_policy.publish_cloudwatch_logs.arn}"
+}
+
+// Access to storage for the  REX-Ray Docker plugin, that provides EBS volumes
+// See https://rexray.readthedocs.io/en/stable/user-guide/storage-providers/aws/
+
+resource "aws_iam_policy" "access_ebs_rex_ray" {
+  name        = "access-ebs-rex-ray"
+  description = "Access EBS for the REX-Ray Docker plugin"
+
+  policy = "${data.aws_iam_policy_document.access_ebs_rex_ray.json}"
+}
+
+data "aws_iam_policy_document" "access_ebs_rex_ray" {
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "ec2:AttachVolume",
+      "ec2:CreateVolume",
+      "ec2:CreateSnapshot",
+      "ec2:CreateTags",
+      "ec2:DeleteVolume",
+      "ec2:DeleteSnapshot",
+      "ec2:DescribeAvailabilityZones",
+      "ec2:DescribeInstances",
+      "ec2:DescribeVolumes",
+      "ec2:DescribeVolumeAttribute",
+      "ec2:DescribeVolumeStatus",
+      "ec2:DescribeSnapshots",
+      "ec2:CopySnapshot",
+      "ec2:DescribeSnapshotAttribute",
+      "ec2:DetachVolume",
+      "ec2:ModifySnapshotAttribute",
+      "ec2:ModifyVolumeAttribute",
+      "ec2:DescribeTags",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "access_ebs_rex_ray" {
+  role       = "${aws_iam_role.coreos.name}"
+  policy_arn = "${aws_iam_policy.access_ebs_rex_ray.arn}"
+}
+
+// Access to storage for the  REX-Ray Docker plugin, that provides EBS volumes
+// See https://www.consul.io/docs/agent/options.html#amazon-ec2
+
+resource "aws_iam_policy" "describe_instances_consul" {
+  name        = "describe-instances-consul"
+  description = "Consul AWS discovery access to instances"
+
+  policy = "${data.aws_iam_policy_document.describe_instances_consul.json}"
+}
+
+data "aws_iam_policy_document" "describe_instances_consul" {
+  statement {
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "ec2:DescribeInstances",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "describe_instances_consul" {
+  role       = "${aws_iam_role.coreos.name}"
+  policy_arn = "${aws_iam_policy.describe_instances_consul.arn}"
 }
 
 // Access to ECS from EC2

@@ -1,6 +1,6 @@
 locals {
   log_groups = [
-    "coreos-docker-logs",
+    "docker-logs",
   ]
 }
 
