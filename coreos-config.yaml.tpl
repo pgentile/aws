@@ -72,7 +72,7 @@ systemd:
         - name: 50-network-config.conf
           contents: |
             [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "${flannel_cidr_block}" }'
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "${flannel_cidr_block}", "Backend": { "Type": "vxlan" } }'
 
     # Allow the Docker config to use metadata from CoreOS ignition
     - name: docker.service
@@ -95,6 +95,7 @@ systemd:
         Documentation=http://rexray.readthedocs.io/en/release-0.8.0/user-guide/docker-plugins/#elastic-block-service
         Requires=docker.socket
         After=docker.socket
+        PartOf=docker.service
 
         [Service]
         Type=oneshot

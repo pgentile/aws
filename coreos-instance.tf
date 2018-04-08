@@ -163,6 +163,7 @@ data "aws_iam_policy_document" "access_ebs_rex_ray" {
     effect = "Allow"
 
     resources = [
+      "*",
       "arn:aws:ec2:${var.region}::volume/*",
       "arn:aws:ec2:${var.region}::instance/*",
     ]
