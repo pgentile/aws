@@ -17,7 +17,7 @@ resource "aws_instance" "coreos" {
 
   associate_public_ip_address = true
 
-  subnet_id = "${module.network.subnet_ids[0]}"
+  subnet_id = "${element(module.network.subnet_ids, count.index)}"
   key_name  = "${aws_key_pair.ssh.key_name}"
   user_data = "${data.ct_config.ignition_config.rendered}"
 
@@ -59,11 +59,13 @@ data "template_file" "ignition_config" {
   template = "${file("${path.module}/coreos-config.yaml.tpl")}"
 
   vars {
-    env                  = "${var.env}"
-    platform             = "${var.platform}"
-    region               = "${var.region}"
-    etcd_discovery_token = "${var.etcd_discovery_token}"
-    cluster_name         = "${aws_ecs_cluster.default.name}"
+    env                         = "${var.env}"
+    platform                    = "${var.platform}"
+    region                      = "${var.region}"
+    etcd_discovery_token        = "${var.etcd_discovery_token}"
+    cluster_name                = "${aws_ecs_cluster.default.name}"
+    flannel_cidr_block          = "${var.flannel_cidr_block}"
+    docker_cloudwatch_log_group = "${aws_cloudwatch_log_group.docker_logs.name}"
   }
 }
 
@@ -71,7 +73,7 @@ data "template_file" "ignition_config" {
 data "ct_config" "ignition_config" {
   content      = "${data.template_file.ignition_config.rendered}"
   platform     = "ec2"
-  pretty_print = false
+  pretty_print = true
 }
 
 resource "local_file" "ignition_config" {
@@ -89,10 +91,10 @@ resource "aws_iam_instance_profile" "coreos" {
 resource "aws_iam_role" "coreos" {
   name               = "coreos"
   description        = "CoreOS role"
-  assume_role_policy = "${data.aws_iam_policy_document.assume_ec2.json}"
+  assume_role_policy = "${data.aws_iam_policy_document.coreos.json}"
 }
 
-data "aws_iam_policy_document" "assume_ec2" {
+data "aws_iam_policy_document" "coreos" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -115,10 +117,9 @@ resource "aws_iam_policy" "publish_cloudwatch_logs" {
 data "aws_iam_policy_document" "publish_cloudwatch_logs" {
   statement {
     effect    = "Allow"
-    resources = ["arn:aws:logs:${var.region}:*:*"]
+    resources = ["arn:aws:logs:${var.region}:*"]
 
     actions = [
-      "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
       "logs:DescribeLogGroups",
@@ -148,24 +149,30 @@ data "aws_iam_policy_document" "access_ebs_rex_ray" {
     resources = ["*"]
 
     actions = [
-      "ec2:AttachVolume",
-      "ec2:CreateVolume",
-      "ec2:CreateSnapshot",
-      "ec2:CreateTags",
-      "ec2:DeleteVolume",
-      "ec2:DeleteSnapshot",
       "ec2:DescribeAvailabilityZones",
       "ec2:DescribeInstances",
       "ec2:DescribeVolumes",
       "ec2:DescribeVolumeAttribute",
       "ec2:DescribeVolumeStatus",
-      "ec2:DescribeSnapshots",
-      "ec2:CopySnapshot",
-      "ec2:DescribeSnapshotAttribute",
-      "ec2:DetachVolume",
-      "ec2:ModifySnapshotAttribute",
-      "ec2:ModifyVolumeAttribute",
       "ec2:DescribeTags",
+      "ec2:ModifyVolumeAttribute",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    resources = [
+      "arn:aws:ec2:${var.region}::volume/*",
+      "arn:aws:ec2:${var.region}::instance/*",
+    ]
+
+    actions = [
+      "ec2:AttachVolume",
+      "ec2:CreateVolume",
+      "ec2:CreateTags",
+      "ec2:DeleteVolume",
+      "ec2:DetachVolume",
     ]
   }
 }
@@ -222,7 +229,7 @@ output "etcd_discovery_token" {
 
 output "coreos_public_dns" {
   description = "CoreOS public DNS"
-  value       = "${aws_instance.coreos.public_dns}"
+  value       = ["${aws_instance.coreos.*.public_dns}"]
 }
 
 output "ignition_json_filename" {

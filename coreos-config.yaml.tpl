@@ -1,33 +1,35 @@
-# etcd disabled for now...
-### etcd:
-###   # All options get passed as command line flags to etcd.
-###   # Any information inside curly braces comes from the machine at boot time.
-### 
-###   # multi_region and multi_cloud deployments need to use {PUBLIC_IPV4}
-###   advertise_client_urls:       "http://{PRIVATE_IPV4}:2379"
-###   initial_advertise_peer_urls: "http://{PRIVATE_IPV4}:2380"
-### 
-###   # listen on both the official ports and the legacy ports
-###   # legacy ports can be omitted if your application doesn't depend on them
-###   listen_client_urls:          "http://0.0.0.0:2379"
-###   listen_peer_urls:            "http://{PRIVATE_IPV4}:2380"
-### 
-###   # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=1
-###   # specify the initial size of your cluster with ?size=X
-###   discovery:                   "${etcd_discovery_token}"
+etcd:
+  # All options get passed as command line flags to etcd.
+  # Any information inside curly braces comes from the machine at boot time.
 
-### docker:
-###   flags:
-###     - "--label env=${env}"
-###     - "--label platform=${platform}"
-###     - "--label region=${region}"
-###     # Container logs to AWS
-###     - "--log-driver=awslogs"
-###     - "--log-opt awslogs-region=${region}"
-###     - "--log-opt awslogs-group=coreos-docker-logs"
-###     - "--log-opt awslogs-create-group=true"
-###     # Doesn't work for now...
-###     # - "--log-opt awslogs-tag={HOSTNAME}/{{ .Name }}"
+  # multi_region and multi_cloud deployments need to use {PUBLIC_IPV4}
+  advertise_client_urls:       "http://{PRIVATE_IPV4}:2379"
+  initial_advertise_peer_urls: "http://{PRIVATE_IPV4}:2380"
+
+  # listen on both the official ports and the legacy ports
+  # legacy ports can be omitted if your application doesn't depend on them
+  listen_client_urls:          "http://0.0.0.0:2379"
+  listen_peer_urls:            "http://{PRIVATE_IPV4}:2380"
+
+  # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=1
+  # specify the initial size of your cluster with ?size=X
+  discovery:                   "${etcd_discovery_token}"
+
+docker:
+  flags:
+    - "--label env=${env}"
+    - "--label platform=${platform}"
+    - "--label region=${region}"
+    # Container logs to AWS
+    - "--log-driver=awslogs"
+    - "--log-opt awslogs-region=${region}"
+    - "--log-opt awslogs-group=${docker_cloudwatch_log_group}"
+    - "--log-opt awslogs-create-group=false"
+    # Toujours la galère pour injecter $${COREOS_EC2_HOSTNAME} ...
+    - "--log-opt tag=${cluster_name}/{{.Name}}/{{.ID}}"
+
+flannel:
+  version: "0.10.0"
 
 storage:
   files:
@@ -41,29 +43,7 @@ storage:
         inline: |
           [Time]
           NTP=169.254.169.123
-    
-    # Docker daemon config
-    # The docker0 bridge will have same MTU as the AWS instance
-    - path: /etc/docker/daemon.json
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          {
-            "log-driver": "awslogs",
-            "log-opts": {
-              "awslogs-region": "${region}",
-              "awslogs-group": "docker-logs",
-              "awslogs-create-group": "true",
-              "tag": "${cluster_name}/{{.Name}}/{{.ID}}"
-            },
-            "labels": [
-              "deployment.env=${env}",
-              "deployment.platform=${platform}",
-              "deployment.region=${region}"
-            ]
-          }
-    
+
     # Nice env vars
     - path: /etc/environment
       filesystem: root
@@ -71,10 +51,6 @@ storage:
       contents:
         inline: |
           DOCKER_HIDE_LEGACY_COMMANDS=true
-
-          DEPLOYMENT_ENV=${env}
-          DEPLOYMENT_PLATFORM=${platform}
-          DEPLOYMENT_REGION=${region}
 
     # Legal banner
     - path: /etc/motd.d/legal-banner.conf
@@ -90,9 +66,27 @@ storage:
 
 systemd:
   units:
-    - name: docker.service
-      enable: true
+    # Flannel overlay network config
+    - name: flanneld.service
+      dropins:
+        - name: 50-network-config.conf
+          contents: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "${flannel_cidr_block}" }'
 
+    # Allow the Docker config to use metadata from CoreOS ignition
+    - name: docker.service
+      dropins:
+        - name: 10-config-metadata.conf
+          contents: |
+            [Unit]
+            Requires=coreos-metadata.service
+            After=coreos-metadata.service
+
+            [Service]
+            EnvironmentFile=/run/metadata/coreos
+
+    # Allow Docker volumes to create and manage AWS EBS storage
     - name: docker-plugin-rexray-ebs.service
       enable: true
       contents: |
@@ -115,6 +109,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+    # Register on the AWS ECS cluster
     - name: ecs-agent.service
       enable: true
       contents: |
@@ -150,47 +145,6 @@ systemd:
           --env=ECS_ENABLE_TASK_IAM_ROLE_NETWORK_HOST=true \
           --env=ECS_ENABLE_TASK_ENI=false \
           amazon/amazon-ecs-agent:latest
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: consul-agent.service
-      enable: true
-      contents: |
-        [Unit]
-        Description=Consul Agent
-        Documentation=https://www.consul.io/docs/agent/options.html
-        Requires=docker.socket coreos-metadata.service
-        After=docker.socket coreos-metadata.service
-
-        [Service]
-        Restart=on-failure
-        RestartSec=30
-
-        SyslogIdentifier=consul-agent
-
-        EnvironmentFile=/run/metadata/coreos
-
-        ExecStartPre=-/bin/mkdir -p /var/consul/data
-        ExecStartPre=-/usr/bin/docker kill consul-agent
-        ExecStartPre=-/usr/bin/docker rm consul-agent
-        ExecStartPre=/usr/bin/docker pull consul:latest
-
-        ExecStart=/usr/bin/docker run \
-          --name consul-agent \
-          --net=host \
-          --volume=/var/consul/data:/data \
-          consul:latest agent -server \
-          -ui \
-          -bind $${COREOS_EC2_IPV4_LOCAL} \
-          -advertise $${COREOS_EC2_IPV4_LOCAL} \
-          -bootstrap-expect 1 \
-          -datacenter ${region} \
-          -node-meta "env:${env}" \
-          -node-meta "platform:${platform}" \
-          -node-meta "az:$${COREOS_EC2_AVAILABILITY_ZONE}" \
-          -client "127.0.0.1 $${COREOS_EC2_IPV4_LOCAL}" \
-          -retry-join "provider=aws tag_key=ConsulAgent tag_value=server region=${region}"
 
         [Install]
         WantedBy=multi-user.target

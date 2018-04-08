@@ -19,6 +19,11 @@ variable "cidr_block" {
   default     = "10.0.0.0/16"
 }
 
+variable "flannel_cidr_block" {
+  description = "CIDR block of the Flannel overlay network"
+  default     = "10.1.0.0/16"
+}
+
 variable "my_ip" {
   description = "My IP"
   type        = "string"
