@@ -1,5 +1,16 @@
+CoreOS AWS deployment
+=====================
+
+This is an example of a CoreOS deployment on AWS. This config :
+
+* starts an instance of CoreOS
+* creates a Cloudwatch log groups for the VPC and the Docker containers
+* registers the Docker instance in ECS
+* adds the REX-Ray EBS plugin (useful to create Docker volumes on EBS)
+* creates an VXLAN network (using CoreOS etcd and Flannel) for Docker 
+
 Init AWS
-========
+--------
 
 Init config with the AWS CLI :
 
@@ -10,8 +21,8 @@ aws configure
 This config wil be used by Terraform.
 
 
-Create infrastructure
-=====================
+Create CoreOS infrastructure
+----------------------------
 
 ### Install the Config Transpiler Terraform plugin
 
