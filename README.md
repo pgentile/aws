@@ -1,9 +1,9 @@
 Init AWS
 ========
 
-Init config with the AWS cli :
+Init config with the AWS CLI :
 
-```
+```bash
 aws configure
 ```
 
@@ -13,82 +13,47 @@ This config wil be used by Terraform.
 Create infrastructure
 =====================
 
-My IP address file:
+### Install the Config Transpiler Terraform plugin
 
-```
-# my_ip.auto.tfvars
-my_ip = "MY_IP_ADDRESS"
+This Terraform config requires a specific plugin.
+You can install the plugin on **MacOS** using the following script :
+
+```bash
+./install-terraform-plugins.sh
 ```
 
-Create infrastructure:
+More information:
 
+* https://github.com/coreos/terraform-provider-ct
+* https://github.com/coreos/container-linux-config-transpiler
+* https://coreos.com/ignition/docs/latest/
+
+### Generate the IP address file
+
+```bash
+./get-my-ip.sh
 ```
+
+This generates a Terraform vars file named `my_ip.auto.tfvars`.
+Terraform will use your IP to filter VPC incoming trafic.
+
+### Generate the ectd discovery token
+
+```bash
+./init-etcd-discovery-token.sh
+```
+
+A Terraform vars file will be created with the token.
+Please note that the token can only be used once per deployment.
+
+### Create infrastructure
+
+```bash
 terraform apply -auto-approve
 ```
 
-Destroy infrastructure:
+### Destroy infrastructure
 
-```
+```bash
 terraform destroy -force
-```
-
-
-Connections SSH
-===============
-
-See https://blog.octo.com/le-bastion-ssh/
-
-```
-eval $(ssh-agent -s)
-ssh-add ~/.ssh/id_rsa
-
-ssh -A -o StrictHostKeyChecking=no admin@NAME.eu-west-3.compute.amazonaws.com
-
-# Then, ssh PRIVATE_IP
-```
-
-Clés GPG
-========
-
-Pour récupérer les clés GPG :
-
-```
-apt-get install dirmngr --install-recommends 
-```
-
-A faire si blocage par un firewall ou un security group
-
-```
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 
-```
-
-Sinon, ouvrir le port suivant :
-
-```
-11371/tcp
-```
-
-Pour faire :
-
-```
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C36
-```
-
-
-Check my system
-===============
-
-SSH config:
-
-```
-sudo sshd -T
-```
-
-Check the system with Lynis:
-
-```
-sudo yum install lynis 
-lynis show profiles
-lynis show settings
-sudo lynis audit system
 ```
