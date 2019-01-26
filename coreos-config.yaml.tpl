@@ -102,7 +102,9 @@ systemd:
         RemainAfterExit=yes
         SyslogIdentifier=docker-plugin-rexray-ebs
 
-        ExecStart=/usr/bin/docker plugin install --grant-all-permissions rexray/ebs EBS_REGION=${region} REXRAY_FSTYPE=xfs
+        ExecStart=/usr/bin/docker plugin install --grant-all-permissions rexray/ebs \
+          EBS_REGION=${region} \
+          REXRAY_FSTYPE=xfs
         
         ExecStop=/usr/bin/docker plugin disable rexray/ebs
         ExecStop=/usr/bin/docker plugin rm rexray/ebs

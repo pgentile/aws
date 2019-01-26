@@ -3,7 +3,7 @@
 locals {
   coreos_instance_tags = "${merge(
     local.platform_tags,
-    map("Name", "coreos", "ConsulAgent", "server")
+    map("Name", "coreos")
   )}"
 
   ignition_json_filename = "${path.module}/output/coreos/ignition.json"
@@ -53,7 +53,6 @@ data "aws_ami" "coreos" {
 }
 
 // CoreOS Ignition config (convert from the YAML template to JSON with the ct command)
-// Don't forget to install the ct command (brew instann coreos-ct on MacOS)
 
 data "template_file" "ignition_config" {
   template = "${file("${path.module}/coreos-config.yaml.tpl")}"
@@ -181,32 +180,6 @@ data "aws_iam_policy_document" "access_ebs_rex_ray" {
 resource "aws_iam_role_policy_attachment" "access_ebs_rex_ray" {
   role       = "${aws_iam_role.coreos.name}"
   policy_arn = "${aws_iam_policy.access_ebs_rex_ray.arn}"
-}
-
-// Access to storage for the  REX-Ray Docker plugin, that provides EBS volumes
-// See https://www.consul.io/docs/agent/options.html#amazon-ec2
-
-resource "aws_iam_policy" "describe_instances_consul" {
-  name        = "describe-instances-consul"
-  description = "Consul AWS discovery access to instances"
-
-  policy = "${data.aws_iam_policy_document.describe_instances_consul.json}"
-}
-
-data "aws_iam_policy_document" "describe_instances_consul" {
-  statement {
-    effect    = "Allow"
-    resources = ["*"]
-
-    actions = [
-      "ec2:DescribeInstances",
-    ]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "describe_instances_consul" {
-  role       = "${aws_iam_role.coreos.name}"
-  policy_arn = "${aws_iam_policy.describe_instances_consul.arn}"
 }
 
 // Access to ECS from EC2
