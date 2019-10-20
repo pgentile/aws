@@ -1,34 +1,45 @@
 // The CoreOS instance
 
 locals {
-  coreos_instance_tags = "${merge(
+  coreos_instance_tags = merge(
     local.platform_tags,
-    map("Name", "coreos")
-  )}"
+    {
+      "Name" = "coreos"
+    },
+  )
 
   ignition_json_filename = "${path.module}/output/coreos/ignition.json"
 }
 
 resource "aws_instance" "coreos" {
-  ami           = "${data.aws_ami.coreos.id}"
+  count         = 1
+  ami           = data.aws_ami.coreos.id
   instance_type = "t2.micro"
 
-  vpc_security_group_ids = ["${module.base_security_group.id}"]
+  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+  # force an interpolation expression to be interpreted as a list by wrapping it
+  # in an extra set of list brackets. That form was supported for compatibility in
+  # v0.11, but is no longer supported in Terraform v0.12.
+  #
+  # If the expression in the following list itself returns a list, remove the
+  # brackets to avoid interpretation as a list of lists. If the expression
+  # returns a single list item then leave it as-is and remove this TODO comment.
+  vpc_security_group_ids = [module.base_security_group.id]
 
   associate_public_ip_address = true
 
-  subnet_id = "${element(module.network.subnet_ids, count.index)}"
-  key_name  = "${aws_key_pair.ssh.key_name}"
-  user_data = "${data.ct_config.ignition_config.rendered}"
+  subnet_id = module.network.subnet_ids[count.index]
+  key_name  = aws_key_pair.ssh.key_name
+  user_data = data.ct_config.ignition_config.rendered
 
-  iam_instance_profile = "${aws_iam_instance_profile.coreos.name}"
+  iam_instance_profile = aws_iam_instance_profile.coreos.name
 
   root_block_device {
     volume_size = 8
   }
 
-  tags        = "${local.coreos_instance_tags}"
-  volume_tags = "${local.coreos_instance_tags}"
+  tags        = local.coreos_instance_tags
+  volume_tags = local.coreos_instance_tags
 }
 
 // Search CoreOS AMI
@@ -55,42 +66,44 @@ data "aws_ami" "coreos" {
 // CoreOS Ignition config (convert from the YAML template to JSON with the ct command)
 
 data "template_file" "ignition_config" {
-  template = "${file("${path.module}/coreos-config.yaml.tpl")}"
+  template = file("${path.module}/coreos-config.yaml.tpl")
 
-  vars {
-    env                         = "${var.env}"
-    platform                    = "${var.platform}"
-    region                      = "${var.region}"
-    etcd_discovery_token        = "${var.etcd_discovery_token}"
-    cluster_name                = "${aws_ecs_cluster.default.name}"
-    flannel_cidr_block          = "${var.flannel_cidr_block}"
-    docker_cloudwatch_log_group = "${aws_cloudwatch_log_group.docker_logs.name}"
+  vars = {
+    env                         = var.env
+    platform                    = var.platform
+    region                      = var.region
+    etcd_discovery_token        = var.etcd_discovery_token
+    cluster_name                = aws_ecs_cluster.default.name
+    flannel_cidr_block          = var.flannel_cidr_block
+    docker_cloudwatch_log_group = aws_cloudwatch_log_group.docker_logs.name
   }
 }
 
 // Don't forget to install the script. See the install-terraform-plugins.sh script
 data "ct_config" "ignition_config" {
-  content      = "${data.template_file.ignition_config.rendered}"
+  content      = data.template_file.ignition_config.rendered
   platform     = "ec2"
   pretty_print = true
 }
 
 resource "local_file" "ignition_config" {
-  content  = "${data.ct_config.ignition_config.rendered}"
-  filename = "${local.ignition_json_filename}"
+  content              = data.ct_config.ignition_config.rendered
+  filename             = local.ignition_json_filename
+  file_permission      = "0644"
+  directory_permission = "0755"
 }
 
 // Instance profile
 
 resource "aws_iam_instance_profile" "coreos" {
   name = "coreos"
-  role = "${aws_iam_role.coreos.name}"
+  role = aws_iam_role.coreos.name
 }
 
 resource "aws_iam_role" "coreos" {
   name               = "coreos"
   description        = "CoreOS role"
-  assume_role_policy = "${data.aws_iam_policy_document.coreos.json}"
+  assume_role_policy = data.aws_iam_policy_document.coreos.json
 }
 
 data "aws_iam_policy_document" "coreos" {
@@ -110,7 +123,7 @@ resource "aws_iam_policy" "publish_cloudwatch_logs" {
   name        = "publish-cloudwatch-logs"
   description = "Publish logs to Cloudwatch"
 
-  policy = "${data.aws_iam_policy_document.publish_cloudwatch_logs.json}"
+  policy = data.aws_iam_policy_document.publish_cloudwatch_logs.json
 }
 
 data "aws_iam_policy_document" "publish_cloudwatch_logs" {
@@ -128,8 +141,8 @@ data "aws_iam_policy_document" "publish_cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy_attachment" "publish_cloudwatch_logs" {
-  role       = "${aws_iam_role.coreos.name}"
-  policy_arn = "${aws_iam_policy.publish_cloudwatch_logs.arn}"
+  role       = aws_iam_role.coreos.name
+  policy_arn = aws_iam_policy.publish_cloudwatch_logs.arn
 }
 
 // Access to storage for the  REX-Ray Docker plugin, that provides EBS volumes
@@ -139,7 +152,7 @@ resource "aws_iam_policy" "access_ebs_rex_ray" {
   name        = "access-ebs-rex-ray"
   description = "Access EBS for the REX-Ray Docker plugin"
 
-  policy = "${data.aws_iam_policy_document.access_ebs_rex_ray.json}"
+  policy = data.aws_iam_policy_document.access_ebs_rex_ray.json
 }
 
 data "aws_iam_policy_document" "access_ebs_rex_ray" {
@@ -178,14 +191,14 @@ data "aws_iam_policy_document" "access_ebs_rex_ray" {
 }
 
 resource "aws_iam_role_policy_attachment" "access_ebs_rex_ray" {
-  role       = "${aws_iam_role.coreos.name}"
-  policy_arn = "${aws_iam_policy.access_ebs_rex_ray.arn}"
+  role       = aws_iam_role.coreos.name
+  policy_arn = aws_iam_policy.access_ebs_rex_ray.arn
 }
 
 // Access to ECS from EC2
 
 resource "aws_iam_role_policy_attachment" "ecs" {
-  role       = "${aws_iam_role.coreos.name}"
+  role       = aws_iam_role.coreos.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
@@ -193,20 +206,21 @@ resource "aws_iam_role_policy_attachment" "ecs" {
 
 output "coreos_ami_id" {
   description = "ID of the CoreOS AMI"
-  value       = "${data.aws_ami.coreos.id}"
+  value       = data.aws_ami.coreos.id
 }
 
 output "etcd_discovery_token" {
   description = "etcd discovery token for CoreOS instance"
-  value       = "${var.etcd_discovery_token}"
+  value       = var.etcd_discovery_token
 }
 
 output "coreos_public_dns" {
   description = "CoreOS public DNS"
-  value       = ["${aws_instance.coreos.*.public_dns}"]
+  value       = [aws_instance.coreos.*.public_dns]
 }
 
 output "ignition_json_filename" {
   description = "Ignition JSON config filename"
-  value       = "${local.ignition_json_filename}"
+  value       = local.ignition_json_filename
 }
+

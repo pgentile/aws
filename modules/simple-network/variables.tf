@@ -10,17 +10,18 @@ variable "cidr_block" {
 
 variable "availability_zones" {
   description = "AWS availability zones"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "subnet_cidr_blocks" {
   description = "CIDR block of the subnets"
+  type = list(string)
   default     = []
 }
 
 variable "allowed_cidr_blocks" {
   description = "CIDR blocks with full access allowed"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "ephemeral_ports" {

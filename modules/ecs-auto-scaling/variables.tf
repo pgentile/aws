@@ -1,11 +1,11 @@
 variable "name" {
   description = "Group name"
-  type        = "string"
+  type        = string
 }
 
 variable "key_name" {
   description = "SSH key name"
-  type        = "string"
+  type        = string
 }
 
 variable "associate_public_ip_address" {
@@ -15,34 +15,34 @@ variable "associate_public_ip_address" {
 
 variable "subnet_ids" {
   description = "Subnet IDs"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "security_group_ids" {
   description = "Security group IDs"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "instance_config_s3_bucket_id" {
   description = "Instance S3 bucket ID"
-  type        = "string"
+  type        = string
 }
 
 variable "instance_config_s3_domain_name" {
   description = "Instance S3 domain name"
-  type        = "string"
+  type        = string
 }
 
 variable "min_size" {
-  default = "1"
+  default = 1
 }
 
 variable "max_size" {
-  default = "1"
+  default = 1
 }
 
 variable "desired_capacity" {
-  default = "1"
+  default = 1
 }
 
 variable "tags" {

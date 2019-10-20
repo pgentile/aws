@@ -7,6 +7,6 @@ locals {
     Name = "default"
   }
 
-  tags                  = "${merge(var.tags, local.name_tags)}"
-  default_resource_tags = "${merge(local.tags, local.default_resource_name_tags)}"
+  tags                  = merge(var.tags, local.name_tags)
+  default_resource_tags = merge(local.tags, local.default_resource_name_tags)
 }

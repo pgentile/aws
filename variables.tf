@@ -7,6 +7,7 @@ variable "region" {
 
 variable "availability_zones" {
   description = "AWS availability zones"
+  type        = list(string)
 
   default = [
     "eu-west-3a",
@@ -26,12 +27,12 @@ variable "flannel_cidr_block" {
 
 variable "my_ip" {
   description = "My IP"
-  type        = "string"
+  type        = string
 }
 
 variable "etcd_discovery_token" {
   description = "etcd discovery token for CoreOS instance"
-  type        = "string"
+  type        = string
 }
 
 variable "enable_load_balancer" {
@@ -51,9 +52,15 @@ variable "platform" {
 
 locals {
   env_tags = {
-    Env         = "${var.env}"
+    Env         = var.env
     Provisioner = "terraform"
   }
 
-  platform_tags = "${merge(local.env_tags, map("Platform", var.platform))}"
+  platform_tags = merge(
+    local.env_tags,
+    {
+      "Platform" = var.platform
+    },
+  )
 }
+

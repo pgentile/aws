@@ -5,3 +5,4 @@ resource "aws_ecs_cluster" "default" {
 resource "aws_ecr_repository" "default" {
   name = "repository"
 }
+

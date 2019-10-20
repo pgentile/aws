@@ -1,16 +1,16 @@
 variable "name" {
   description = "Network name"
-  type        = "string"
+  type        = string
 }
 
 variable "vpc_id" {
   description = "ID of the VPC"
-  type        = "string"
+  type        = string
 }
 
 variable "allowed_cidr_blocks" {
   description = "CIDR blocks with full access allowed"
-  type        = "list"
+  type        = list(string)
 }
 
 variable "tags" {
