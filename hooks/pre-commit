@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+exec 1>&2
+
+echo "Formattage"
+
+files=$(git diff --cached --name-only --diff-filter=ACMR "*.tf" "*.tfvars")
+
+for file in "$files"; do
+  cat "$file" | terraform fmt - >"$file.tmp"
+  mv "$file.tmp" "$file"
+done
+
+echo "$file" | xargs git add
